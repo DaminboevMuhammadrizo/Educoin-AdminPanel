@@ -18,7 +18,7 @@ const mockGifts = {
                 miniDescription: "Premium kontent",
                 photo: "https://cdn-icons-png.flaticon.com/512/2909/2909808.png",
                 count: 100,
-                amount: 50000,
+                amount: 500,
                 givenCount: 45,
                 createdAt: "2025-01-15T10:30:00.000Z"
             },
@@ -29,7 +29,7 @@ const mockGifts = {
                 miniDescription: "Digital kitoblar",
                 photo: "https://cdn-icons-png.flaticon.com/512/686/686589.png",
                 count: 50,
-                amount: 25000,
+                amount: 250,
                 givenCount: 32,
                 createdAt: "2025-01-16T11:20:00.000Z"
             },
@@ -40,7 +40,7 @@ const mockGifts = {
                 miniDescription: "Taqdimot certificati",
                 photo: "https://cdn-icons-png.flaticon.com/512/2996/2996684.png",
                 count: 200,
-                amount: 15000,
+                amount: 150,
                 givenCount: 178,
                 createdAt: "2025-01-17T09:15:00.000Z"
             },
@@ -51,7 +51,7 @@ const mockGifts = {
                 miniDescription: "Mentor sessiya",
                 photo: "https://cdn-icons-png.flaticon.com/512/2933/2933245.png",
                 count: 30,
-                amount: 75000,
+                amount: 750,
                 givenCount: 12,
                 createdAt: "2025-01-18T14:45:00.000Z"
             },
@@ -62,7 +62,7 @@ const mockGifts = {
                 miniDescription: "Chegirma codi",
                 photo: "https://cdn-icons-png.flaticon.com/512/2921/2921222.png",
                 count: 1000,
-                amount: 0,
+                amount: 10,
                 givenCount: 567,
                 createdAt: "2025-01-19T16:30:00.000Z"
             },
@@ -73,7 +73,7 @@ const mockGifts = {
                 miniDescription: "Premium account",
                 photo: "https://cdn-icons-png.flaticon.com/512/2909/2909900.png",
                 count: 75,
-                amount: 120000,
+                amount: 1200,
                 givenCount: 28,
                 createdAt: "2025-01-20T13:00:00.000Z"
             },
@@ -84,7 +84,7 @@ const mockGifts = {
                 miniDescription: "Workshop",
                 photo: "https://cdn-icons-png.flaticon.com/512/2933/2933245.png",
                 count: 40,
-                amount: 30000,
+                amount: 300,
                 givenCount: 40,
                 createdAt: "2025-01-21T08:15:00.000Z"
             },
@@ -95,7 +95,7 @@ const mockGifts = {
                 miniDescription: "E-book",
                 photo: "https://cdn-icons-png.flaticon.com/512/2921/2921222.png",
                 count: 500,
-                amount: 5000,
+                amount: 500,
                 givenCount: 423,
                 createdAt: "2025-01-22T12:30:00.000Z"
             },
@@ -106,7 +106,7 @@ const mockGifts = {
                 miniDescription: "Video kurs",
                 photo: "https://cdn-icons-png.flaticon.com/512/2996/2996684.png",
                 count: 150,
-                amount: 80000,
+                amount: 80,
                 givenCount: 89,
                 createdAt: "2025-01-23T10:45:00.000Z"
             },
@@ -117,7 +117,7 @@ const mockGifts = {
                 miniDescription: "Konsultatsiya",
                 photo: "https://cdn-icons-png.flaticon.com/512/686/686589.png",
                 count: 60,
-                amount: 45000,
+                amount: 450,
                 givenCount: 34,
                 createdAt: "2025-01-24T14:20:00.000Z"
             }
@@ -254,7 +254,7 @@ export default function PlatformGiftsPage() {
                                 {gift.amount > 0 && (
                                     <div className="flex justify-between text-xs">
                                         <span className="text-gray-500">Narxi:</span>
-                                        <span className="font-medium text-blue-600">{formatNumber(gift.amount)} so'm</span>
+                                        <span className="font-medium text-blue-600">{formatNumber(gift.amount)} coin</span>
                                     </div>
                                 )}
                             </div>
