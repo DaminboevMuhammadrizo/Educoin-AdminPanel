@@ -30,7 +30,7 @@ function Sidebar() {
         },
         {
             icon: <PeopleIcon />,
-            label: 'Users',
+            label: 'Foydalanuvchilar',
             path: '/users',
             hasSubmenu: true,
             submenu: [
