@@ -38,14 +38,14 @@ function Sidebar() {
                 { icon: <ChildCareIcon />, label: 'Bolalar', path: '/users/children' }
             ]
         },
-        { icon: <CardMembershipIcon />, label: 'Subscription Plans', path: '/subscription-plans' },
-        { icon: <AssignmentIcon />, label: 'Default Tasks', path: '/default-tasks' },
-        { icon: <TaskIcon />, label: 'Tasks', path: '/tasks' },
-        { icon: <RecommendIcon />, label: 'Recommendations', path: '/recommendations' },
-        { icon: <CardGiftcardIcon />, label: 'Platform Gifts', path: '/platform-gifts' },
-        { icon: <CategoryIcon />, label: 'Categories', path: '/categories' },
-        { icon: <NotificationsIcon />, label: 'Notifications', path: '/notifications' },
-        { icon: <PaymentIcon />, label: 'Payments', path: '/payments' },
+        { icon: <CardMembershipIcon />, label: 'Obuna rejalari', path: '/subscription-plans' },
+        { icon: <AssignmentIcon />, label: 'Standart vazifalar', path: '/default-tasks' },
+        { icon: <TaskIcon />, label: 'Vazifalar', path: '/tasks' },
+        { icon: <RecommendIcon />, label: 'Tavsiyalar', path: '/recommendations' },
+        { icon: <CardGiftcardIcon />, label: "Platforma sovg'alari", path: '/platform-gifts' },
+        { icon: <CategoryIcon />, label: 'Kategoriyalar', path: '/categories' },
+        { icon: <NotificationsIcon />, label: 'Bildirishnomalar', path: '/notifications' },
+        { icon: <PaymentIcon />, label: "To'lovlar", path: '/payments' },
     ];
 
     const handleMenuClick = (item: any) => {
