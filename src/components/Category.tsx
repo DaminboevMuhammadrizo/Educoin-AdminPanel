@@ -154,7 +154,7 @@ export default function CategoriesPage() {
     const pagination = mockCategories.data.meta.pagination;
 
     const getUZTitle = (translations: any[]) =>
-        translations.find((t) => t.language === 'UZ')?.title || "Noma'lum";
+        translations.find((t) => t.language === 'UZ')?.title || "Nomalum";
 
     // Client-side format funksiyasi
     const formatDate = (date: string) => {
@@ -223,7 +223,7 @@ export default function CategoriesPage() {
                                         handleDelete(cat.id);
                                     }}
                                     className="p-1 text-gray-600 rounded-md hover:bg-gray-100"
-                                    title="O'chirish"
+                                    title="Ochirish"
                                 >
                                     <DeleteIcon sx={{ fontSize: 16 }} />
                                 </button>
@@ -250,7 +250,6 @@ export default function CategoriesPage() {
                             <h3 className="text-base font-semibold text-gray-800 mb-1">
                                 {getUZTitle(cat.translations)}
                             </h3>
-                            {/* 246-qator - endi hydration xatosiz ishlaydi */}
                             <p className="text-xs text-gray-400">{formatDate(cat.createdAt)}</p>
                         </div>
                     </div>
