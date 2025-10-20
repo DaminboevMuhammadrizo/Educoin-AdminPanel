@@ -5,17 +5,9 @@ const nextConfig = {
   },
   images: {
     domains: ['cdn-icons-png.flaticon.com'],
-    unoptimized: true, // NETLIFY UCHUN MUHIM
+    unoptimized: true,
   },
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
-  // swcMinify ni olib tashlang yoki comment qiling
-  // swcMinify: true,
-  compress: true,
   trailingSlash: true,
-  // NETLIFY UCHUN QO'SHIMCHA
-  output: 'standalone', // yoki 'export'
 }
 
 export default nextConfig
