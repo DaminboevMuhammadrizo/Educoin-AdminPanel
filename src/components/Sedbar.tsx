@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import PeopleIcon from '@mui/icons-material/People';
 import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import TaskIcon from '@mui/icons-material/Task';
@@ -11,16 +10,13 @@ import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import CategoryIcon from '@mui/icons-material/Category';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import PaymentIcon from '@mui/icons-material/Payment';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom';
 import ChildCareIcon from '@mui/icons-material/ChildCare';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-
 
 function Sidebar() {
     const router = useRouter();
-    const [usersOpen, setUsersOpen] = useState(false);
-    const [activeItem, setActiveItem] = useState('Users');
+    const [activeItem, setActiveItem] = useState('Dashboard');
 
     const menuItems = [
         {
@@ -29,37 +25,60 @@ function Sidebar() {
             path: '/',
         },
         {
-            icon: <PeopleIcon />,
-            label: 'Foydalanuvchilar',
-            path: '/users',
-            hasSubmenu: true,
-            submenu: [
-                { icon: <FamilyRestroomIcon />, label: 'Ota-ona', path: '/users/parents' },
-                { icon: <ChildCareIcon />, label: 'Bolalar', path: '/users/children' }
-            ]
+            icon: <FamilyRestroomIcon />,
+            label: 'Ota-ona',
+            path: '/parents',
         },
-        { icon: <CardMembershipIcon />, label: 'Obuna rejalari', path: '/subscription-plans' },
-        { icon: <AssignmentIcon />, label: 'Standart vazifalar', path: '/default-tasks' },
-        { icon: <TaskIcon />, label: 'Vazifalar', path: '/tasks' },
-        { icon: <RecommendIcon />, label: 'Tavsiyalar', path: '/recommendations' },
-        { icon: <CardGiftcardIcon />, label: "Platforma sovg'alari", path: '/platform-gifts' },
-        { icon: <CategoryIcon />, label: 'Kategoriyalar', path: '/categories' },
-        { icon: <NotificationsIcon />, label: 'Bildirishnomalar', path: '/notifications' },
-        { icon: <PaymentIcon />, label: "To'lovlar", path: '/payments' },
+        {
+            icon: <ChildCareIcon />,
+            label: 'Bolalar',
+            path: '/children',
+        },
+        {
+            icon: <TaskIcon />,
+            label: 'Vazifalar',
+            path: '/tasks'
+        },
+        {
+            icon: <AssignmentIcon />,
+            label: 'Standart vazifalar',
+            path: '/default-tasks'
+        },
+        {
+            icon: <RecommendIcon />,
+            label: 'Tavsiyalar',
+            path: '/recommendations'
+        },
+        {
+            icon: <CardGiftcardIcon />,
+            label: "Platforma sovg'alari",
+            path: '/platform-gifts'
+        },
+        {
+            icon: <CategoryIcon />,
+            label: 'Kategoriyalar',
+            path: '/categories'
+        },
+        {
+            icon: <CardMembershipIcon />,
+            label: 'Obuna rejalari',
+            path: '/subscription-plans'
+        },
+        {
+            icon: <NotificationsIcon />,
+            label: 'Bildirishnomalar',
+            path: '/notifications'
+        },
+        {
+            icon: <PaymentIcon />,
+            label: "To'lovlar",
+            path: '/payments'
+        },
     ];
 
     const handleMenuClick = (item: any) => {
-        if (item.hasSubmenu) {
-            setUsersOpen(!usersOpen);
-        } else {
-            setActiveItem(item.label);
-            router.push(item.path);
-        }
-    };
-
-    const handleSubmenuClick = (subItem: any) => {
-        setActiveItem(subItem.label);
-        router.push(subItem.path);
+        setActiveItem(item.label);
+        router.push(item.path);
     };
 
     return (
@@ -81,57 +100,24 @@ function Sidebar() {
                                 {/* Main menu item */}
                                 <button
                                     onClick={() => handleMenuClick(item)}
-                                    className={`w-full flex items-center justify-between px-3 py-3 rounded-lg transition-all text-sm group ${activeItem === item.label && !item.hasSubmenu
+                                    className={`w-full flex items-center px-3 py-3 rounded-lg transition-all text-sm group ${activeItem === item.label
                                             ? 'text-white font-medium shadow-md'
                                             : 'text-gray-700 hover:bg-white hover:shadow-sm'
                                         }`}
                                     style={
-                                        activeItem === item.label && !item.hasSubmenu
+                                        activeItem === item.label
                                             ? { background: 'linear-gradient(135deg, #69569F 0%, #8B7AB8 100%)' }
                                             : {}
                                     }
                                 >
                                     <div className="flex items-center gap-3">
-                                        <span className={`transition-transform group-hover:scale-110 ${activeItem === item.label && !item.hasSubmenu ? 'text-white' : 'text-gray-600 group-hover:text-[#69569F]'
+                                        <span className={`transition-transform group-hover:scale-110 ${activeItem === item.label ? 'text-white' : 'text-gray-600 group-hover:text-[#69569F]'
                                             }`}>
                                             {item.icon}
                                         </span>
                                         <span className="font-medium">{item.label}</span>
                                     </div>
-                                    {item.hasSubmenu && (
-                                        <span className={`transition-transform ${usersOpen ? 'rotate-180' : ''} ${activeItem === item.label && !item.hasSubmenu ? 'text-white' : 'text-gray-500 group-hover:text-[#69569F]'
-                                            }`}>
-                                            <ExpandMoreIcon fontSize="small" />
-                                        </span>
-                                    )}
                                 </button>
-
-                                {/* Submenu */}
-                                {item.hasSubmenu && usersOpen && (
-                                    <div className="ml-6 mt-2 space-y-1 border-l-2 border-gray-200 pl-2">
-                                        {item.submenu?.map((subItem, subIndex) => (
-                                            <button
-                                                key={subIndex}
-                                                onClick={() => handleSubmenuClick(subItem)}
-                                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm group ${activeItem === subItem.label
-                                                        ? 'text-white font-medium shadow-md'
-                                                        : 'text-gray-600 hover:bg-white hover:shadow-sm'
-                                                    }`}
-                                                style={
-                                                    activeItem === subItem.label
-                                                        ? { background: 'linear-gradient(135deg, #69569F 0%, #8B7AB8 100%)' }
-                                                        : {}
-                                                }
-                                            >
-                                                <span className={`transition-transform group-hover:scale-110 ${activeItem === subItem.label ? 'text-white' : 'text-gray-500 group-hover:text-[#69569F]'
-                                                    }`}>
-                                                    {subItem.icon}
-                                                </span>
-                                                <span className="font-medium">{subItem.label}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
                             </div>
                         ))}
                     </nav>

@@ -1,10 +1,10 @@
-import TasksPage from '@/components/Tasks'
+import ParentsPage from '@/components/Parents'
 import React from 'react'
 
 function page() {
   return (
     <>
-        <TasksPage/>
+        <ParentsPage/>
     </>
   )
 }
