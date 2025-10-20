@@ -1,14 +1,3 @@
-// /** @type {import('next').NextConfig} */
-// const nextConfig = {
-//   eslint: {
-//     ignoreDuringBuilds: true,
-//   },
-// };
-
-// export default nextConfig;
-
-
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     eslint: {
@@ -24,19 +13,11 @@ const nextConfig = {
     },
     experimental: {
         optimizeCss: true,
-        swcMinify: true,
     },
-    // Compression
+    // swcMinify ni experimental dan chiqarib, asosiy config ga qo'ying
+    swcMinify: true,
     compress: true,
-    // Static optimization
     trailingSlash: true,
 }
-
-// next.config.js
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-    enabled: process.env.ANALYZE === 'true',
-})
-
-module.exports = withBundleAnalyzer(nextConfig)
 
 export default nextConfig
