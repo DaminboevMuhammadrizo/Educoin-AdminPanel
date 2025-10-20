@@ -3,11 +3,14 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "next dev --turbo",
+        "dev": "next dev",
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
         "build:analyze": "ANALYZE=true next build"
+    },
+    "engines": {
+        "node": ">=18.0.0"
     },
     "dependencies": {
         "@emotion/react": "^11.14.0",
