@@ -40,21 +40,30 @@
 
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import './globals.css';
 import Navbar from '@/components/Navabar';
 import Sidebar from '@/components/Sedbar';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { getaccessToken } from '@/utils/getToken';
 
-export default function RootLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
+export default function RootLayout({ children, }: { children: React.ReactNode }) {
     const pathname = usePathname();
 
-    // Auth sahifalarni tekshirish
     const isAuthPage = pathname?.startsWith('/auth');
+
+    const router = useRouter();
+
+    useEffect(() => {
+        const token = getaccessToken();
+        const isAuthPage = window.location.pathname.startsWith('/auth');
+
+        if (!token && !isAuthPage) {
+            router.push('/auth/login');
+        }
+    }, [router]);
+
+
 
     return (
         <html lang="uz">
