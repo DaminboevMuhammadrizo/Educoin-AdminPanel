@@ -45,7 +45,7 @@ import './globals.css';
 import Navbar from '@/components/Navabar';
 import Sidebar from '@/components/Sedbar';
 import { usePathname, useRouter } from 'next/navigation';
-import { getaccessToken } from '@/utils/getToken';
+import { getAccessToken } from '@/utils/getToken';
 
 export default function RootLayout({ children, }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -55,7 +55,7 @@ export default function RootLayout({ children, }: { children: React.ReactNode })
     const router = useRouter();
 
     useEffect(() => {
-        const token = getaccessToken();
+        const token = getAccessToken();
         const isAuthPage = window.location.pathname.startsWith('/auth');
 
         if (!token && !isAuthPage) {
