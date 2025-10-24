@@ -1,20 +1,6 @@
 'use client'
 
-import { getaccessToken } from '@/utils/getToken';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react'
-
 export default function Page() {
-    const router = useRouter()
-
-    // // Tokeni tekshirish
-    // useEffect(() => {
-    //     const token = getaccessToken()
-
-    //     if (!token) {
-    //         router.push('/auth/login')
-    //     }
-    // }, [router])
 
     return (
         <div>

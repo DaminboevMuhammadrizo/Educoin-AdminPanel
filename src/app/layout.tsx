@@ -40,7 +40,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         </main>
                     </div>
                 )}
-                {/* Toaster har doim rootda bo'lishi kerak */}
                 <Toaster
                     position="top-right"
                     reverseOrder={false}
