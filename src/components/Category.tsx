@@ -7,193 +7,132 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CircularProgress from '@mui/material/CircularProgress';
 import { getAccessToken } from '@/utils/getToken';
-
+import { Category } from '@/utils/type';
+import CreateCategoryModal from '@/modals/categories/CreateCateogryModal';
+import DeleteConfirmModal from '@/modals/categories/CategoryDeleteModal';
+import toast from 'react-hot-toast';
+import UpdateCategoryModal from '@/modals/categories/CategoryUpdateModal';
 
 export default function CategoriesPage() {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
     const [categories, setCategories] = useState<Category[]>([]);
-    const [pagination, setPagination] = useState<any>(null);
-    const [hovered, setHovered] = useState<string | null>(null);
-    const [isClient, setIsClient] = useState(false);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [openModal, setOpenModal] = useState(false);
+    const [editCategory, setEditCategory] = useState<Category | null>(null);
 
-    useEffect(() => {
-        setIsClient(true);
-    }, []);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-
-                const token = getAccessToken()
-
-                const res = await axios.get(`${baseUrl}/categories/admin`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                if (res.status === 200 && res.data?.data?.data?.length) {
-                    setCategories(res.data.data.data);
-                    setPagination(res.data.data.meta.pagination);
-                } else {
-                    setCategories([]);
-                    setError('Maʼlumot topilmadi');
-                }
-            } catch (err: any) {
-                console.error(err);
-                setError(err.response?.data?.message || 'Xatolik yuz berdi');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [baseUrl]);
-
-
-    const getUZTitle = (translations: translations[]) =>
-        translations.find((t) => t.language === 'UZ')?.title || 'Nomalum';
-
-    const formatDate = (date: string) => {
-        if (!isClient) return '';
-        return new Date(date).toLocaleDateString('uz-UZ').replaceAll('/', '.');
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const res = await axios.get(`${baseUrl}/categories/admin`, {
+                headers: { Authorization: `Bearer ${getAccessToken()}` },
+            });
+            setCategories(res.data.data.data || []);
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Xatolik yuz berdi');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleEdit = (id: string) => console.log('Edit:', id);
-    const handleDelete = (id: string) => console.log('Delete:', id);
-    const handleAdd = () => console.log('Add new category');
-    const handlePageChange = (page: number) => console.log('Page:', page);
+    useEffect(() => { fetchData(); }, []);
+
+    const confirmDelete = async () => {
+        if (!deleteId) return;
+        try {
+            await axios.delete(`${baseUrl}/categories/${deleteId}`, {
+                headers: { Authorization: `Bearer ${getAccessToken()}` },
+            });
+            setCategories(prev => prev.filter(cat => cat.id !== deleteId));
+            setDeleteId(null);
+            toast.success("Kategoriya o'chirildi");
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Xatolik yuz berdi');
+        }
+    };
+
+    const getUZTitle = (translations: any[]) =>
+        translations.find(t => t.language === 'UZ')?.title || 'Nomalum';
 
     return (
         <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Kategoriyalar</h1>
-                    {pagination && (
-                        <p className="text-gray-500 text-sm mt-1">
-                            Jami {pagination.count} ta kategoriya | Sahifada {categories.length} ta
-                        </p>
-                    )}
-                </div>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-800">Kategoriyalar</h1>
                 <button
-                    onClick={handleAdd}
-                    className="flex items-center gap-2 px-4 py-2 text-white font-semibold rounded-lg shadow hover:shadow-md transition-all"
+                    onClick={() => setOpenModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 text-white font-semibold rounded-lg"
                     style={{ background: 'linear-gradient(135deg, #69569F, #8B7AB8)' }}
                 >
                     <AddIcon sx={{ fontSize: 20 }} />
-                    <span className="text-sm">Qo'shish</span>
+                    <span>Qo'shish</span>
                 </button>
             </div>
 
-            {loading && (
+            {loading ? (
+                // 🔥 LOADING: Faqat loader ko'rinadi
                 <div className="flex justify-center items-center h-64">
                     <CircularProgress sx={{ color: '#7C6BB3' }} />
                 </div>
-            )}
+            ) : (
+                // 🔥 CONTENT: Faqat ma'lumotlar ko'rinadi
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    {categories.map(cat => (
+                        <div key={cat.id} className="relative bg-white rounded-xl p-5 shadow-md">
+                            <span className={`absolute top-2 left-2 px-2 py-1 text-xs rounded-full ${
+                                cat.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-600'
+                            }`}>
+                                {cat.isActive ? 'Faol' : 'Nofaol'}
+                            </span>
 
-            {!loading && error && (
-                <div className="flex flex-col justify-center items-center h-64">
-                    <h1 className="text-lg text-red-600 font-semibold">{error}</h1>
+                            <div className="absolute top-2 right-2 flex gap-1">
+                                <button onClick={() => setEditCategory(cat)} className="p-1 text-gray-600">
+                                    <EditIcon sx={{ fontSize: 16 }} />
+                                </button>
+                                <button onClick={() => setDeleteId(cat.id)} className="p-1 text-gray-600">
+                                    <DeleteIcon sx={{ fontSize: 16 }} />
+                                </button>
+                            </div>
+
+                            <div className="flex flex-col items-center text-center mt-4">
+                                <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                                    {cat.icon ? (
+                                        <img
+                                            src={`https://pub-c6b5ab8943d5481b8627979d8736fa97.r2.dev/${cat.icon}`}
+                                            alt={getUZTitle(cat.translations)}
+                                            className="w-full h-full object-contain rounded-full"
+                                        />
+                                    ) : (
+                                        <span className="text-2xl">📚</span>
+                                    )}
+                                </div>
+                                <h3 className="text-base font-semibold text-gray-800">
+                                    {getUZTitle(cat.translations)}
+                                </h3>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
 
-            {!loading && !error && categories.length > 0 && (
-                <>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        {categories.map((cat) => (
-                            <div
-                                key={cat.id}
-                                onMouseEnter={() => setHovered(cat.id)}
-                                onMouseLeave={() => setHovered(null)}
-                                className="relative bg-white rounded-xl p-5 shadow-md hover:shadow-lg transition-all"
-                            >
-                                <span
-                                    className={`absolute top-2 left-2 px-2 py-1 text-xs rounded-full font-bold ${cat.isActive
-                                            ? 'bg-green-100 text-green-800'
-                                            : 'bg-red-100 text-red-600'
-                                        }`}
-                                >
-                                    {cat.isActive ? 'Faol' : 'Nofaol'}
-                                </span>
+            <CreateCategoryModal
+                open={openModal}
+                onClose={() => setOpenModal(false)}
+                onSuccess={fetchData}
+            />
 
-                                {hovered === cat.id && (
-                                    <div className="absolute top-2 right-2 flex gap-1">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleEdit(cat.id);
-                                            }}
-                                            className="p-1 text-gray-600 rounded-md hover:bg-gray-100"
-                                            title="Tahrirlash"
-                                        >
-                                            <EditIcon sx={{ fontSize: 16 }} />
-                                        </button>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDelete(cat.id);
-                                            }}
-                                            className="p-1 text-gray-600 rounded-md hover:bg-gray-100"
-                                            title="Ochirish"
-                                        >
-                                            <DeleteIcon sx={{ fontSize: 16 }} />
-                                        </button>
-                                    </div>
-                                )}
+            <DeleteConfirmModal
+                open={!!deleteId}
+                onClose={() => setDeleteId(null)}
+                onConfirm={confirmDelete}
+            />
 
-                                <div className="flex flex-col items-center text-center mt-4">
-                                    <div
-                                        className="w-14 h-14 rounded-full flex items-center justify-center mb-3 overflow-hidden transition-all"
-                                        style={{
-                                            background:
-                                                hovered === cat.id
-                                                    ? 'linear-gradient(135deg, #69569F, #8B7AB8)'
-                                                    : '#f3f4f6',
-                                        }}
-                                    >
-                                        <span className="text-2xl">📚</span>
-                                    </div>
-                                    <h3 className="text-base font-semibold text-gray-800 mb-1">
-                                        {getUZTitle(cat.translations)}
-                                    </h3>
-                                    <p className="text-xs text-gray-400">{formatDate(cat.createdAt)}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Pagination */}
-                    {pagination && (
-                        <div className="mt-6 flex items-center justify-between text-sm text-gray-600">
-                            <span>
-                                Sahifa {pagination.pageNumber} / {pagination.pageCount} | Jami:{' '}
-                                {pagination.count} ta
-                            </span>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => handlePageChange(pagination.pageNumber - 1)}
-                                    disabled={pagination.pageNumber === 1}
-                                    className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
-                                >
-                                    Oldingi
-                                </button>
-                                <button
-                                    onClick={() => handlePageChange(pagination.pageNumber + 1)}
-                                    disabled={pagination.pageNumber === pagination.pageCount}
-                                    className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
-                                >
-                                    Keyingi
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </>
-            )}
+            <UpdateCategoryModal
+                open={!!editCategory}
+                onClose={() => setEditCategory(null)}
+                category={editCategory}
+                onSuccess={fetchData}
+            />
         </div>
     );
 }

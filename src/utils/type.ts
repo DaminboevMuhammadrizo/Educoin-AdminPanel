@@ -1,14 +1,14 @@
-enum language {
+export enum language {
     UZ = 'UZ'
 }
 
-type translations = {
+export type translations = {
     id: string,
     title: string,
     language: language
 }
 
-type Category = {
+export type Category = {
     id: string;
     icon: string;
     isActive: boolean;
