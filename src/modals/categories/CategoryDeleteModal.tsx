@@ -6,6 +6,7 @@ interface Props {
     open: boolean;
     onClose: () => void;
     onConfirm: () => void;
+    message?: string;
 }
 
 export default function DeleteConfirmModal({ open, onClose, onConfirm }: Props) {

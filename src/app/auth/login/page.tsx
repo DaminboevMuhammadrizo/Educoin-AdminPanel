@@ -33,7 +33,7 @@ export default function LoginPage() {
             if (res.status === 200 && res.data?.data?.accessToken) {
                 localStorage.setItem('accessToken', res.data.data.accessToken);
                 console.log(res.data.data.accessToken)
-                router.push('/categories');
+                router.push('/');
             } else {
                 setError('Noto‘g‘ri javob formati yoki foydalanuvchi topilmadi.');
             }
