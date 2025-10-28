@@ -2,71 +2,60 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { getAccessToken } from '@/utils/getToken';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 import CircularProgress from '@mui/material/CircularProgress';
+import { getAccessToken } from '@/utils/getToken';
 import toast from 'react-hot-toast';
-import CreateRecommendationModal from '@/modals/recomidations/CreateRecomidation';
-import UpdateRecommendationModal from '@/modals/recomidations/UpdateRecommendationModal';
+import CreateSubscriptionPlanModal from '@/modals/subscriptionPlans/CreateSubscriptionPlans';
 import DeleteConfirmModal from '@/modals/categories/CategoryDeleteModal';
+import UpdateSubscriptionPlanModal from '@/modals/subscriptionPlans/UpdateSubscriptionPlans';
 
 interface Translation {
-    language: string;
-    title: string;
-    description: string;
-}
-
-interface Recommendation {
     id: string;
-    character: string;
-    fromYear: number;
-    toYear: number;
-    isActive: boolean;
-    photo: string;
-    translations: Translation[];
+    title: string;
+    language: string;
+}
+
+interface SubscriptionPlan {
+    id: string;
+    price: number;
+    durationDays: number;
+    maxChildren: number;
+    maxMedia: number;
+    maxGifts: number;
+    maxReminders: number;
+    maxTasks: number;
+    freeAfterReferrals: number;
+    psychologicalAdvice: boolean;
+    taskRecommendations: boolean;
     createdAt: string;
+    translations: Translation[];
+    order: number;
 }
 
-interface ApiResponse {
-    statusCode: number;
-    success: boolean;
-    data: {
-        data: Recommendation[];
-        meta: {
-            pagination: {
-                count: number;
-                pageCount: number;
-                pageNumber: number;
-                pageSize: number;
-            };
-        };
-    };
-}
-
-export default function RecommendationsPage() {
+export default function SubscriptionPlansPage() {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
-    const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-    const [pagination, setPagination] = useState<any>(null);
+    const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [openModal, setOpenModal] = useState(false);
-    const [editRecommendation, setEditRecommendation] = useState<Recommendation | null>(null);
+    const [editPlan, setEditPlan] = useState<SubscriptionPlan | null>(null);
 
     const fetchData = async () => {
         try {
             setLoading(true);
-            const response = await axios.get<ApiResponse>(`${baseUrl}/recommendations/admin`, {
-                headers: {
-                    Authorization: `Bearer ${getAccessToken()}`
-                },
+            const response = await axios.get(`${baseUrl}/subscription-plans/admin`, {
+                headers: { Authorization: `Bearer ${getAccessToken()}` },
             });
 
             if (response.data.success) {
-                setRecommendations(response.data.data.data);
-                setPagination(response.data.data.meta.pagination);
+                const sortedPlans = response.data.data.sort((a: SubscriptionPlan, b: SubscriptionPlan) => a.order - b.order);
+                setPlans(sortedPlans);
             } else {
                 toast.error('Maʼlumotlarni yuklashda xatolik');
             }
@@ -84,54 +73,32 @@ export default function RecommendationsPage() {
     const confirmDelete = async () => {
         if (!deleteId) return;
         try {
-            await axios.delete(`${baseUrl}/recommendations/${deleteId}`, {
-                headers: {
-                    Authorization: `Bearer ${getAccessToken()}`
-                },
+            await axios.delete(`${baseUrl}/subscription-plans/${deleteId}`, {
+                headers: { Authorization: `Bearer ${getAccessToken()}` },
             });
-            setRecommendations(prev => prev.filter(rec => rec.id !== deleteId));
+            setPlans(prev => prev.filter(plan => plan.id !== deleteId));
             setDeleteId(null);
-            toast.success("Tavsiya o'chirildi");
+            toast.success("Obuna plani o'chirildi");
         } catch (err: any) {
             toast.error(err.response?.data?.message || 'Xatolik yuz berdi');
         }
     };
 
+    const formatNumber = (num: number) => {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
+
     const getUZTitle = (translations: Translation[]) =>
         translations.find((t) => t.language === 'UZ')?.title || "Noma'lum";
-
-    const getUZDescription = (translations: Translation[]) =>
-        translations.find((t) => t.language === 'UZ')?.description || "Tavsif mavjud emas";
-
-    // Title uchun truncate funksiyasi (max 32 belgi)
-    const truncateTitle = (text: string, maxLength: number = 32) => {
-        if (text.length <= maxLength) return text;
-        return text.substring(0, maxLength).trim() + '...';
-    };
-
-    // Description uchun truncate funksiyasi (max 100 belgi - cardga mos)
-    const truncateDescription = (text: string, maxLength: number = 100) => {
-        if (text.length <= maxLength) return text;
-        return text.substring(0, maxLength).trim() + '...';
-    };
-
-    const getAgeRange = (fromYear: number, toYear: number) => {
-        if (fromYear === 0 && toYear === 0) return "Barcha yoshlar";
-        return `${fromYear}-${toYear} yosh`;
-    };
-
-    const handlePageChange = (page: number) => {
-        console.log('Page changed to:', page);
-    };
 
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Tavsiyalar</h1>
-                    {pagination && (
+                    <h1 className="text-2xl font-bold text-gray-800">Obuna Planlari</h1>
+                    {plans.length > 0 && (
                         <p className="text-gray-500 text-sm mt-1">
-                            Jami {pagination.count} ta tavsiya | Sahifada {recommendations.length} ta
+                            Jami {plans.length} ta plan
                         </p>
                     )}
                 </div>
@@ -150,125 +117,104 @@ export default function RecommendationsPage() {
                     <CircularProgress sx={{ color: '#7C6BB3' }} />
                 </div>
             ) : (
-                <>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        {recommendations.map(rec => (
-                            <div key={rec.id} className="relative bg-white rounded-xl p-5 shadow-md overflow-hidden">
-                                {/* Status badge */}
-                                <span className={`absolute top-2 left-2 px-2 py-1 text-xs rounded-full ${rec.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-600'
-                                    }`}>
-                                    {rec.isActive ? 'Faol' : 'Nofaol'}
-                                </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {plans.map(plan => (
+                        <div key={plan.id} className="relative bg-white rounded-xl p-5 shadow-md">
+                            <span className="absolute top-2 left-2 px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full font-bold">
+                                #{plan.order}
+                            </span>
 
-                                {/* Edit/Delete buttons */}
-                                <div className="absolute top-2 right-2 flex gap-1">
-                                    <button
-                                        onClick={() => setEditRecommendation(rec)}
-                                        className="p-1 text-gray-600 hover:bg-gray-100 rounded-md"
-                                        title="Tahrirlash"
-                                    >
-                                        <EditIcon sx={{ fontSize: 16 }} />
-                                    </button>
-                                    <button
-                                        onClick={() => setDeleteId(rec.id)}
-                                        className="p-1 text-gray-600 hover:bg-gray-100 rounded-md"
-                                        title="O'chirish"
-                                    >
-                                        <DeleteIcon sx={{ fontSize: 16 }} />
-                                    </button>
+                            <div className="absolute top-2 right-2 flex gap-1">
+                                <button
+                                    onClick={() => setEditPlan(plan)}
+                                    className="p-1 text-gray-600 hover:bg-gray-100 rounded-md"
+                                >
+                                    <EditIcon sx={{ fontSize: 16 }} />
+                                </button>
+                                <button
+                                    onClick={() => setDeleteId(plan.id)}
+                                    className="p-1 text-gray-600 hover:bg-gray-100 rounded-md"
+                                >
+                                    <DeleteIcon sx={{ fontSize: 16 }} />
+                                </button>
+                            </div>
+
+                            <div className="flex flex-col items-center text-center mt-2">
+                                <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                                    <div className="font-bold text-lg">
+                                        {plan.price === 0 ? '🆓' : '💎'}
+                                    </div>
                                 </div>
 
-                                <div className="flex flex-col items-center text-center mt-8">
-                                    {/* Photo */}
-                                    <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-3 flex-shrink-0">
-                                        {rec.photo ? (
-                                            <img
-                                                src={rec.photo}
-                                                alt={getUZTitle(rec.translations)}
-                                                className="w-full h-full object-cover rounded-full"
-                                            />
+                                <h3 className="text-base font-semibold text-gray-800 mb-2">
+                                    {getUZTitle(plan.translations)}
+                                </h3>
+
+                                <div className="text-center mb-3">
+                                    <div className="text-lg font-bold text-gray-900">
+                                        {plan.price === 0 ? 'Bepul' : `${formatNumber(plan.price)} so'm`}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                        {plan.durationDays} kun
+                                    </div>
+                                </div>
+
+                                <div className="w-full mb-3">
+                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                        <div className="text-center p-1 bg-gray-50 rounded">
+                                            <div className="font-semibold">{plan.maxChildren}</div>
+                                            <div className="text-gray-500">Farzand</div>
+                                        </div>
+                                        <div className="text-center p-1 bg-gray-50 rounded">
+                                            <div className="font-semibold">{plan.maxMedia}</div>
+                                            <div className="text-gray-500">Media</div>
+                                        </div>
+                                        <div className="text-center p-1 bg-gray-50 rounded">
+                                            <div className="font-semibold">{plan.maxGifts}</div>
+                                            <div className="text-gray-500">Sovg'a</div>
+                                        </div>
+                                        <div className="text-center p-1 bg-gray-50 rounded">
+                                            <div className="font-semibold">{plan.maxTasks}</div>
+                                            <div className="text-gray-500">Vazifa</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="w-full space-y-1 mb-3">
+                                    <div className="flex items-center justify-between text-xs">
+                                        <span className="text-gray-600">Psixologik maslahat</span>
+                                        {plan.psychologicalAdvice ? (
+                                            <CheckIcon sx={{ fontSize: 14, color: 'green' }} />
                                         ) : (
-                                            <span className="text-2xl text-gray-400">
-                                                📚
-                                            </span>
+                                            <CloseIcon sx={{ fontSize: 14, color: 'red' }} />
                                         )}
                                     </div>
-
-                                    {/* Title - 32 belgi limit bilan ... */}
-                                    <h3
-                                        className="text-base font-semibold text-gray-800 mb-2 w-full break-words"
-                                        title={getUZTitle(rec.translations)}
-                                    >
-                                        {truncateTitle(getUZTitle(rec.translations), 32)}
-                                    </h3>
-
-                                    {/* Description - 100 belgi limit bilan ... */}
-                                    <p
-                                        className="text-xs text-gray-600 mb-2 w-full break-words min-h-[3rem]"
-                                        title={getUZDescription(rec.translations)}
-                                    >
-                                        {truncateDescription(getUZDescription(rec.translations), 100)}
-                                    </p>
-
-                                    {/* Statistics */}
-                                    <div className="w-full space-y-1 mb-3">
-                                        <div className="flex items-center justify-between text-xs">
-                                            <span className="text-gray-600">Xarakter:</span>
-                                            <span className="font-semibold text-purple-600">{rec.character}</span>
-                                        </div>
-                                        <div className="flex items-center justify-between text-xs">
-                                            <span className="text-gray-600">Yosh oralig'i:</span>
-                                            <span className="font-semibold">{getAgeRange(rec.fromYear, rec.toYear)}</span>
-                                        </div>
+                                    <div className="flex items-center justify-between text-xs">
+                                        <span className="text-gray-600">Vazifa tavsiyalari</span>
+                                        {plan.taskRecommendations ? (
+                                            <CheckIcon sx={{ fontSize: 14, color: 'green' }} />
+                                        ) : (
+                                            <CloseIcon sx={{ fontSize: 14, color: 'red' }} />
+                                        )}
                                     </div>
-
-                                    {/* Date */}
-                                    <p className="text-xs text-gray-400">
-                                        {new Date(rec.createdAt).toLocaleDateString('uz-UZ')}
-                                    </p>
+                                    <div className="flex items-center justify-between text-xs">
+                                        <span className="text-gray-600">Bepul takliflar</span>
+                                        <span className="font-semibold">{plan.freeAfterReferrals} ta</span>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
 
-                    {/* Pagination */}
-                    {pagination && (
-                        <div className="mt-6 flex items-center justify-between text-sm text-gray-600">
-                            <span>
-                                Sahifa {pagination.pageNumber} / {pagination.pageCount} | Jami: {pagination.count} ta
-                            </span>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => handlePageChange(pagination.pageNumber - 1)}
-                                    disabled={pagination.pageNumber === 1}
-                                    className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
-                                >
-                                    Oldingi
-                                </button>
-                                <button
-                                    onClick={() => handlePageChange(pagination.pageNumber + 1)}
-                                    disabled={pagination.pageNumber === pagination.pageCount}
-                                    className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
-                                >
-                                    Keyingi
-                                </button>
+                                <p className="text-xs text-gray-400">
+                                    {new Date(plan.createdAt).toLocaleDateString('uz-UZ')}
+                                </p>
                             </div>
                         </div>
-                    )}
-                </>
+                    ))}
+                </div>
             )}
 
-            {/* Modallar */}
-            <CreateRecommendationModal
+            <CreateSubscriptionPlanModal
                 open={openModal}
                 onClose={() => setOpenModal(false)}
-                onSuccess={fetchData}
-            />
-
-            <UpdateRecommendationModal
-                open={!!editRecommendation}
-                onClose={() => setEditRecommendation(null)}
-                recommendation={editRecommendation}
                 onSuccess={fetchData}
             />
 
@@ -276,7 +222,13 @@ export default function RecommendationsPage() {
                 open={!!deleteId}
                 onClose={() => setDeleteId(null)}
                 onConfirm={confirmDelete}
-                message="Rostdan ham bu tavsiyani o'chirmoqchimisiz?"
+            />
+
+            <UpdateSubscriptionPlanModal
+                open={!!editPlan}
+                onClose={() => setEditPlan(null)}
+                plan={editPlan}
+                onSuccess={fetchData}
             />
         </div>
     );

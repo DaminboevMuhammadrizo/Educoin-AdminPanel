@@ -14,8 +14,17 @@ interface Props {
     onSuccess: () => void;
 }
 
+interface Translation {
+    language: string;
+    title: string;
+}
+
 export default function UpdateCategoryModal({ open, onClose, category, onSuccess }: Props) {
-    const [title, setTitle] = useState('');
+    const [translations, setTranslations] = useState<Translation[]>([
+        { language: 'UZ', title: '' },
+        { language: 'EN', title: '' },
+        { language: 'RU', title: '' }
+    ]);
     const [isActive, setIsActive] = useState(true);
     const [icon, setIcon] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
@@ -24,21 +33,78 @@ export default function UpdateCategoryModal({ open, onClose, category, onSuccess
 
     useEffect(() => {
         if (open && category) {
-            const uzTitle = category.translations.find(t => t.language === 'UZ')?.title || '';
-            setTitle(uzTitle);
+            // Har bir til uchun translation ni olish
+            const uzTranslation = category.translations.find((t: Translation) => t.language === 'UZ');
+            const enTranslation = category.translations.find((t: Translation) => t.language === 'EN');
+            const ruTranslation = category.translations.find((t: Translation) => t.language === 'RU');
+
+            setTranslations([
+                { language: 'UZ', title: uzTranslation?.title || '' },
+                { language: 'EN', title: enTranslation?.title || '' },
+                { language: 'RU', title: ruTranslation?.title || '' }
+            ]);
             setIsActive(category.isActive);
         }
     }, [open, category]);
 
+    const handleTranslationChange = (language: string, value: string) => {
+        setTranslations(prev =>
+            prev.map(t =>
+                t.language === language ? { ...t, title: value } : t
+            )
+        );
+    };
+
+    const getTranslationValue = (language: string) => {
+        const translation = translations.find(t => t.language === language);
+        return translation ? translation.title : '';
+    };
+
+    // Fayl hajmini tekshirish funksiyasi
+    const checkFileSize = (file: File): boolean => {
+        const maxSize = 1 * 1024 * 1024; // 1MB
+        if (file.size > maxSize) {
+            toast.error(`Fayl hajmi 1MB dan katta! Sizning faylingiz: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
+            return false;
+        }
+        return true;
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            // Fayl hajmini tekshiramiz
+            if (checkFileSize(file)) {
+                setIcon(file);
+            } else {
+                // Agar fayl hajmi katta bo'lsa, inputni tozalaymiz
+                e.target.value = '';
+            }
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!category) return;
+
+        // Validatsiya - barcha tillar uchun
+        const emptyTranslation = translations.find(t => !t.title.trim());
+        if (emptyTranslation) {
+            toast.error(`Iltimos, ${emptyTranslation.language} tilidagi kategoriya nomini kiriting!`);
+            return;
+        }
 
         setLoading(true);
         try {
             let iconUrl: string | undefined;
 
             if (icon) {
+                // Yangi fayl yuklanayotganda ham hajmini tekshiramiz
+                if (!checkFileSize(icon)) {
+                    setLoading(false);
+                    return;
+                }
+
                 const imageForm = new FormData();
                 imageForm.append('file', icon);
                 const fileRes = await axios.post(`${baseUrl}/categories/file`, imageForm, {
@@ -48,7 +114,7 @@ export default function UpdateCategoryModal({ open, onClose, category, onSuccess
             }
 
             const categoryData: any = {
-                translations: [{ language: 'UZ', title }],
+                translations,
                 isActive,
             };
             if (iconUrl) categoryData.icon = iconUrl;
@@ -81,7 +147,7 @@ export default function UpdateCategoryModal({ open, onClose, category, onSuccess
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-5">
-                    {/* Icon upload - FIXED */}
+                    {/* Icon upload */}
                     <div>
                         <label className="block text-sm font-medium mb-1">Icon (rasm)</label>
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer relative">
@@ -90,7 +156,7 @@ export default function UpdateCategoryModal({ open, onClose, category, onSuccess
                                     <input
                                         type="file"
                                         accept="image/*"
-                                        onChange={e => setIcon(e.target.files?.[0] || null)}
+                                        onChange={handleFileChange}
                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                     />
                                     <div className="flex flex-col items-center text-gray-500">
@@ -98,11 +164,15 @@ export default function UpdateCategoryModal({ open, onClose, category, onSuccess
                                             📁
                                         </div>
                                         <p className="text-sm">Rasm yuklang</p>
+                                        <p className="text-xs text-gray-400 mt-1">Maksimum hajm: 1MB</p>
                                     </div>
                                 </>
                             ) : (
                                 <div className="relative">
                                     <img src={URL.createObjectURL(icon)} alt="Icon" className="w-full h-40 object-contain" />
+                                    <div className="text-xs text-gray-500 mt-1">
+                                        Hajm: {(icon.size / (1024 * 1024)).toFixed(2)}MB
+                                    </div>
                                     <button
                                         type="button"
                                         onClick={() => setIcon(null)}
@@ -115,15 +185,48 @@ export default function UpdateCategoryModal({ open, onClose, category, onSuccess
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Sarlavha (UZ)</label>
-                        <input
-                            type="text"
-                            value={title}
-                            onChange={e => setTitle(e.target.value)}
-                            placeholder="Kategoriya nomi"
-                            className="w-full border border-gray-300 rounded-md p-2 text-sm"
-                        />
+                    {/* Kategoriya nomlari - har bir til uchun */}
+                    <div className="space-y-3">
+                        <label className="block text-sm font-medium">Kategoriya nomi *</label>
+
+                        {/* UZ */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">O'zbekcha (UZ)</label>
+                            <input
+                                type="text"
+                                value={getTranslationValue('UZ')}
+                                onChange={(e) => handleTranslationChange('UZ', e.target.value)}
+                                placeholder="Kategoriya nomi"
+                                className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                                required
+                            />
+                        </div>
+
+                        {/* EN */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">English (EN)</label>
+                            <input
+                                type="text"
+                                value={getTranslationValue('EN')}
+                                onChange={(e) => handleTranslationChange('EN', e.target.value)}
+                                placeholder="Category name"
+                                className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                                required
+                            />
+                        </div>
+
+                        {/* RU */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">Русский (RU)</label>
+                            <input
+                                type="text"
+                                value={getTranslationValue('RU')}
+                                onChange={(e) => handleTranslationChange('RU', e.target.value)}
+                                placeholder="Название категории"
+                                className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                                required
+                            />
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-2">

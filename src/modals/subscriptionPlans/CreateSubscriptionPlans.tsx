@@ -20,7 +20,11 @@ interface Translation {
 export default function CreateSubscriptionPlanModal({ open, onClose, onSuccess }: Props) {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
-        translations: [{ language: 'UZ', title: '' }],
+        translations: [
+            { language: 'UZ', title: '' },
+            { language: 'EN', title: '' },
+            { language: 'RU', title: '' }
+        ],
         order: 1,
         price: 0,
         durationDays: 30,
@@ -39,9 +43,10 @@ export default function CreateSubscriptionPlanModal({ open, onClose, onSuccess }
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validatsiya
-        if (!formData.translations[0].title.trim()) {
-            toast.error('Iltimos, plan nomini kiriting!');
+        // Validatsiya - barcha tillar uchun
+        const emptyTranslation = formData.translations.find(t => !t.title.trim());
+        if (emptyTranslation) {
+            toast.error(`Iltimos, ${emptyTranslation.language} tilidagi plan nomini kiriting!`);
             return;
         }
 
@@ -65,7 +70,11 @@ export default function CreateSubscriptionPlanModal({ open, onClose, onSuccess }
 
             // Formani tozalash
             setFormData({
-                translations: [{ language: 'UZ', title: '' }],
+                translations: [
+                    { language: 'UZ', title: '' },
+                    { language: 'EN', title: '' },
+                    { language: 'RU', title: '' }
+                ],
                 order: 1,
                 price: 0,
                 durationDays: 30,
@@ -93,11 +102,18 @@ export default function CreateSubscriptionPlanModal({ open, onClose, onSuccess }
         }));
     };
 
-    const handleTranslationChange = (value: string) => {
+    const handleTranslationChange = (language: string, value: string) => {
         setFormData(prev => ({
             ...prev,
-            translations: [{ language: 'UZ', title: value }]
+            translations: prev.translations.map(t =>
+                t.language === language ? { ...t, title: value } : t
+            )
         }));
+    };
+
+    const getTranslationValue = (language: string) => {
+        const translation = formData.translations.find(t => t.language === language);
+        return translation ? translation.title : '';
     };
 
     if (!open) return null;
@@ -120,19 +136,56 @@ export default function CreateSubscriptionPlanModal({ open, onClose, onSuccess }
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-4">
-                    {/* Plan nomi */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Plan nomi (UZ) *
+                    {/* Plan nomlari - har bir til uchun */}
+                    <div className="space-y-3">
+                        <label className="block text-sm font-medium text-gray-700">
+                            Plan nomi *
                         </label>
-                        <input
-                            type="text"
-                            value={formData.translations[0].title}
-                            onChange={(e) => handleTranslationChange(e.target.value)}
-                            placeholder="Masalan: Premium Plan"
-                            className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-purple-400 focus:outline-none"
-                            required
-                        />
+
+                        {/* UZ */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">
+                                O'zbekcha (UZ)
+                            </label>
+                            <input
+                                type="text"
+                                value={getTranslationValue('UZ')}
+                                onChange={(e) => handleTranslationChange('UZ', e.target.value)}
+                                placeholder="Masalan: Premium Plan"
+                                className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                                required
+                            />
+                        </div>
+
+                        {/* EN */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">
+                                English (EN)
+                            </label>
+                            <input
+                                type="text"
+                                value={getTranslationValue('EN')}
+                                onChange={(e) => handleTranslationChange('EN', e.target.value)}
+                                placeholder="Example: Premium Plan"
+                                className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                                required
+                            />
+                        </div>
+
+                        {/* RU */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">
+                                Русский (RU)
+                            </label>
+                            <input
+                                type="text"
+                                value={getTranslationValue('RU')}
+                                onChange={(e) => handleTranslationChange('RU', e.target.value)}
+                                placeholder="Например: Премиум План"
+                                className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                                required
+                            />
+                        </div>
                     </div>
 
                     {/* Narx va muddat */}

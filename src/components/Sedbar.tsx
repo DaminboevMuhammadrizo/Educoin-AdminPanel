@@ -17,8 +17,8 @@ import ChildCareIcon from '@mui/icons-material/ChildCare';
 function Sidebar() {
     const router = useRouter();
     const pathname = usePathname();
-    const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
 
+    const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
 
     const menuItems = [
         { icon: <DashboardIcon />, label: 'Dashboard', path: '/' },
@@ -34,12 +34,9 @@ function Sidebar() {
         { icon: <PaymentIcon />, label: "To'lovlar", path: '/payments' },
     ];
 
-    const handleMenuClick = (item: any) => {
-        router.push(item.path);
+    const handleMenuClick = (path: string) => {
+        router.push(path);
     };
-
-    // Joriy yo‘lga qarab aktiv itemni aniqlaymiz
-    const activePath = menuItems.find((item) => pathname === item.path);
 
     return (
         <aside
@@ -60,7 +57,7 @@ function Sidebar() {
                             return (
                                 <button
                                     key={index}
-                                    onClick={() => handleMenuClick(item)}
+                                    onClick={() => handleMenuClick(item.path)}
                                     className={`w-full flex items-center px-3 py-3 rounded-lg transition-all text-sm group ${active ? 'text-white font-medium shadow-md' : 'text-gray-700 hover:bg-white hover:shadow-sm'
                                         }`}
                                     style={active ? { background: 'linear-gradient(135deg, #69569F 0%, #8B7AB8 100%)' } : {}}

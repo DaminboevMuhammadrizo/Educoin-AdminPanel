@@ -70,12 +70,10 @@ export default function CategoriesPage() {
             </div>
 
             {loading ? (
-                // 🔥 LOADING: Faqat loader ko'rinadi
                 <div className="flex justify-center items-center h-64">
                     <CircularProgress sx={{ color: '#7C6BB3' }} />
                 </div>
             ) : (
-                // 🔥 CONTENT: Faqat ma'lumotlar ko'rinadi
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                     {categories.map(cat => (
                         <div key={cat.id} className="relative bg-white rounded-xl p-5 shadow-md">

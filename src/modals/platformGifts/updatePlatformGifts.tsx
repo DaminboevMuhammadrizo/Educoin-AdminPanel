@@ -24,15 +24,24 @@ interface Props {
   open: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  platformGift: PlatformGift | null; // update uchun gift ma’lumot
+  platformGift: PlatformGift | null;
+}
+
+interface Translation {
+    language: string;
+    title: string;
+    miniDescription: string;
+    description: string;
 }
 
 export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, platformGift }: Props) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
-  const [title, setTitle] = useState('');
-  const [miniDescription, setMiniDescription] = useState('');
-  const [description, setDescription] = useState('');
+  const [translations, setTranslations] = useState<Translation[]>([
+    { language: 'UZ', title: '', miniDescription: '', description: '' },
+    { language: 'EN', title: '', miniDescription: '', description: '' },
+    { language: 'RU', title: '', miniDescription: '', description: '' }
+  ]);
   const [photo, setPhoto] = useState('');
   const [count, setCount] = useState('');
   const [amount, setAmount] = useState('');
@@ -40,7 +49,6 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch categories when modal opens
   useEffect(() => {
     if (open) fetchCategories();
   }, [open]);
@@ -56,13 +64,17 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
     }
   };
 
-  // Fill form with existing data
   useEffect(() => {
     if (platformGift && open) {
       const uzTrans = platformGift.translations.find(t => t.language === 'UZ');
-      setTitle(uzTrans?.title || '');
-      setMiniDescription(uzTrans?.miniDescription || '');
-      setDescription(uzTrans?.description || '');
+      const enTrans = platformGift.translations.find(t => t.language === 'EN');
+      const ruTrans = platformGift.translations.find(t => t.language === 'RU');
+
+      setTranslations([
+        { language: 'UZ', title: uzTrans?.title || '', miniDescription: uzTrans?.miniDescription || '', description: uzTrans?.description || '' },
+        { language: 'EN', title: enTrans?.title || '', miniDescription: enTrans?.miniDescription || '', description: enTrans?.description || '' },
+        { language: 'RU', title: ruTrans?.title || '', miniDescription: ruTrans?.miniDescription || '', description: ruTrans?.description || '' }
+      ]);
       setPhoto(platformGift.photo || '');
       setCount(String(platformGift.count || ''));
       setAmount(String(platformGift.amount || ''));
@@ -70,18 +82,30 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
     }
   }, [platformGift, open]);
 
-  // Reset form on close
   useEffect(() => {
     if (!open) {
-      setTitle('');
-      setMiniDescription('');
-      setDescription('');
+      setTranslations([
+        { language: 'UZ', title: '', miniDescription: '', description: '' },
+        { language: 'EN', title: '', miniDescription: '', description: '' },
+        { language: 'RU', title: '', miniDescription: '', description: '' }
+      ]);
       setPhoto('');
       setCount('');
       setAmount('');
       setCategoryId('');
     }
   }, [open]);
+
+  const handleTranslationChange = (language: string, field: 'title' | 'miniDescription' | 'description', value: string) => {
+    const maxLength = field === 'title' ? 32 : field === 'miniDescription' ? 64 : 256;
+    if (value.length <= maxLength) {
+        setTranslations(prev =>
+            prev.map(t =>
+                t.language === language ? { ...t, [field]: value } : t
+            )
+        );
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,32 +115,36 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
       return;
     }
 
-    if (!title.trim() || !miniDescription.trim() || !description.trim() || !photo.trim() || !categoryId) {
-      toast.error("Iltimos, barcha majburiy maydonlarni to‘ldiring!");
+    const emptyTranslation = translations.find(t => !t.title.trim() || !t.miniDescription.trim() || !t.description.trim());
+    if (emptyTranslation) {
+        toast.error(`Iltimos, barcha maydonlarni to'ldiring!`);
+        return;
+    }
+
+    if (!photo.trim() || !categoryId) {
+      toast.error("Iltimos, barcha majburiy maydonlarni to'ldiring!");
       return;
     }
 
     if (!count || parseInt(count) <= 0) {
-      toast.error("Soni 0 dan katta bo‘lishi kerak!");
+      toast.error("Soni 0 dan katta bo'lishi kerak!");
       return;
     }
 
     if (!amount || parseInt(amount) <= 0) {
-      toast.error("Narx 0 dan katta bo‘lishi kerak!");
+      toast.error("Narx 0 dan katta bo'lishi kerak!");
       return;
     }
 
     setLoading(true);
     try {
       const updatedGift = {
-        translations: [
-          {
-            language: 'UZ',
-            title: title.trim(),
-            miniDescription: miniDescription.trim(),
-            description: description.trim(),
-          },
-        ],
+        translations: translations.map(t => ({
+            language: t.language,
+            title: t.title.trim(),
+            miniDescription: t.miniDescription.trim(),
+            description: t.description.trim(),
+        })),
         photo: photo.trim(),
         count: parseInt(count),
         amount: parseInt(amount),
@@ -130,7 +158,7 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
         },
       });
 
-      toast.success("Sovg‘a muvaffaqiyatli yangilandi!");
+      toast.success("Sovg'a muvaffaqiyatli yangilandi!");
       onSuccess?.();
       onClose();
     } catch (error: any) {
@@ -148,9 +176,8 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
         className="w-full sm:w-[450px] h-full bg-white overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex justify-between items-center px-6 py-5 border-b sticky top-0 bg-white z-10">
-          <h2 className="text-xl font-semibold text-gray-900">Sovg‘ani tahrirlash</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Sovg'ani tahrirlash</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors"
@@ -160,49 +187,70 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Sarlavha *</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              maxLength={32}
-              placeholder="Sovg‘a nomi"
-              className="w-full border border-gray-300 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 rounded-lg px-4 py-2.5 text-sm"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1.5">{title.length}/32</p>
+          {/* 3 ta title birga */}
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-gray-700">Sarlavha *</label>
+
+            {translations.map((translation) => (
+                <div key={translation.language}>
+                    <div className="flex justify-between items-center mb-1">
+                        <p className="text-xs text-gray-500 capitalize">{translation.language} tili</p>
+                        <p className="text-xs text-gray-500">{translation.title.length}/32</p>
+                    </div>
+                    <input
+                        type="text"
+                        value={translation.title}
+                        onChange={(e) => handleTranslationChange(translation.language, 'title', e.target.value)}
+                        placeholder={`Sarlavha ${translation.language} tilida`}
+                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900"
+                        required
+                    />
+                </div>
+            ))}
           </div>
 
-          {/* Mini Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Qisqa tavsif *</label>
-            <input
-              type="text"
-              value={miniDescription}
-              onChange={(e) => setMiniDescription(e.target.value)}
-              maxLength={64}
-              placeholder="Qisqacha tavsif"
-              className="w-full border border-gray-300 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 rounded-lg px-4 py-2.5 text-sm"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1.5">{miniDescription.length}/64</p>
+          {/* 3 ta mini description birga */}
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-gray-700">Qisqa tavsif *</label>
+
+            {translations.map((translation) => (
+                <div key={translation.language}>
+                    <div className="flex justify-between items-center mb-1">
+                        <p className="text-xs text-gray-500 capitalize">{translation.language} tili</p>
+                        <p className="text-xs text-gray-500">{translation.miniDescription.length}/64</p>
+                    </div>
+                    <input
+                        type="text"
+                        value={translation.miniDescription}
+                        onChange={(e) => handleTranslationChange(translation.language, 'miniDescription', e.target.value)}
+                        placeholder={`Qisqa tavsif ${translation.language} tilida`}
+                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900"
+                        required
+                    />
+                </div>
+            ))}
           </div>
 
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">To‘liq tavsif *</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              maxLength={256}
-              placeholder="Batafsil ma’lumot"
-              className="w-full border border-gray-300 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 rounded-lg px-4 py-2.5 text-sm resize-none"
-              rows={4}
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1.5">{description.length}/256</p>
+          {/* 3 ta description birga */}
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-gray-700">To'liq tavsif *</label>
+
+            {translations.map((translation) => (
+                <div key={translation.language}>
+                    <div className="flex justify-between items-center mb-1">
+                        <p className="text-xs text-gray-500 capitalize">{translation.language} tili</p>
+                        <p className="text-xs text-gray-500">{translation.description.length}/256</p>
+                    </div>
+                    <textarea
+                        value={translation.description}
+                        onChange={(e) => handleTranslationChange(translation.language, 'description', e.target.value)}
+                        placeholder={`To'liq tavsif ${translation.language} tilida`}
+                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900 resize-none"
+                        rows={3}
+                        required
+                    />
+                </div>
+            ))}
           </div>
 
           {/* Photo URL */}
@@ -213,7 +261,7 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
               value={photo}
               onChange={(e) => setPhoto(e.target.value)}
               placeholder="https://example.com/image.png"
-              className="w-full border border-gray-300 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 rounded-lg px-4 py-2.5 text-sm"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900"
               required
             />
             {photo && (
@@ -229,10 +277,10 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full border border-gray-300 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 rounded-lg px-4 py-2.5 text-sm"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900"
               required
             >
-              <option value="">Kategoriyani tanlang</option>
+              <option value="" disabled>Kategoriyani tanlang</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.translations.find((t) => t.language === 'UZ')?.title}
@@ -251,7 +299,7 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
                 onChange={(e) => setCount(e.target.value)}
                 placeholder="100"
                 min="1"
-                className="w-full border border-gray-300 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 rounded-lg px-4 py-2.5 text-sm"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900"
                 required
               />
             </div>
@@ -263,18 +311,18 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="500"
                 min="1"
-                className="w-full border border-gray-300 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 rounded-lg px-4 py-2.5 text-sm"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900"
                 required
               />
             </div>
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
+          <div className="flex justify-end gap-3 pt-4 border-t">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-50"
+              className="px-4 py-2 text-sm text-gray-700 font-medium rounded border border-gray-300 hover:bg-gray-50"
               disabled={loading}
             >
               Bekor qilish
@@ -282,8 +330,7 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ background: 'linear-gradient(135deg, #69569F, #8B7AB8)' }}
+              className="px-4 py-2 text-sm bg-gray-900 hover:bg-gray-800 text-white font-medium rounded disabled:opacity-50"
             >
               {loading ? 'Yuklanmoqda...' : "Yangilash"}
             </button>

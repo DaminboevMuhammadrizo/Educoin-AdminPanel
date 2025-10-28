@@ -42,22 +42,6 @@ interface Gift {
     createdAt: string;
 }
 
-interface ApiResponse {
-    statusCode: number;
-    success: boolean;
-    data: {
-        data: Gift[];
-        meta: {
-            pagination: {
-                pageNumber: number;
-                pageSize: number;
-                count: number;
-                pageCount: number;
-            };
-        };
-    };
-}
-
 export default function PlatformGiftsPage() {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -69,11 +53,8 @@ export default function PlatformGiftsPage() {
     const [editGift, setEditGift] = useState<Gift | null>(null);
     const [openModal, setOpenModal] = useState(false);
     const [hovered, setHovered] = useState<string | null>(null);
-
-    // Filter state
     const [selectedCategory, setSelectedCategory] = useState<string>('');
 
-    // Fetch categories
     const fetchCategories = async () => {
         try {
             const response = await axios.get(`${baseUrl}/categories/admin`, {
@@ -87,14 +68,13 @@ export default function PlatformGiftsPage() {
         }
     };
 
-    // Fetch gifts
     const fetchData = async () => {
         try {
             setLoading(true);
             const params: any = {};
             if (selectedCategory) params.categoryId = selectedCategory;
 
-            const response = await axios.get<ApiResponse>(`${baseUrl}/platform-gifts/admin`, {
+            const response = await axios.get(`${baseUrl}/platform-gifts/admin`, {
                 headers: { Authorization: `Bearer ${getAccessToken()}` },
                 params,
             });
@@ -150,13 +130,8 @@ export default function PlatformGiftsPage() {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
 
-    const handlePageChange = (page: number) => {
-        console.log('Page changed to:', page);
-    };
-
     return (
         <div className="p-6">
-            {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">Platform Sovg'alari</h1>
@@ -167,7 +142,6 @@ export default function PlatformGiftsPage() {
                     )}
                 </div>
                 <div className="flex items-center gap-3">
-                    {/* Category Select */}
                     <select
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
@@ -202,7 +176,6 @@ export default function PlatformGiftsPage() {
                 </div>
             ) : (
                 <>
-                    {/* Gifts Grid */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         {gifts.map((gift) => (
                             <div
@@ -211,29 +184,24 @@ export default function PlatformGiftsPage() {
                                 onMouseLeave={() => setHovered(null)}
                                 className="relative bg-white rounded-xl p-5 shadow-md hover:shadow-lg transition-all overflow-hidden"
                             >
-                                {/* Edit/Delete buttons */}
                                 {hovered === gift.id && (
                                     <div className="absolute top-2 right-2 flex gap-1">
                                         <button
                                             onClick={() => setEditGift(gift)}
                                             className="p-1 text-gray-600 hover:bg-gray-100 rounded-md"
-                                            title="Tahrirlash"
                                         >
                                             <EditIcon sx={{ fontSize: 16 }} />
                                         </button>
                                         <button
                                             onClick={() => setDeleteId(gift.id)}
                                             className="p-1 text-gray-600 hover:bg-gray-100 rounded-md"
-                                            title="O'chirish"
                                         >
                                             <DeleteIcon sx={{ fontSize: 16 }} />
                                         </button>
                                     </div>
                                 )}
 
-                                {/* Content */}
                                 <div className="flex flex-col items-center text-center mt-2">
-                                    {/* Photo */}
                                     <div
                                         className="w-14 h-14 rounded-full flex items-center justify-center mb-3 flex-shrink-0 overflow-hidden transition-all"
                                         style={{
@@ -253,7 +221,6 @@ export default function PlatformGiftsPage() {
                                         )}
                                     </div>
 
-                                    {/* Title */}
                                     <h3
                                         className="text-base font-semibold text-gray-800 mb-1 w-full break-words"
                                         title={gift.translations.find(t => t.language === 'UZ')?.title}
@@ -261,7 +228,6 @@ export default function PlatformGiftsPage() {
                                         {getUZTitle(gift.translations)}
                                     </h3>
 
-                                    {/* Mini Description */}
                                     <p
                                         className="text-xs text-gray-600 mb-2 w-full break-words"
                                         title={gift.translations.find(t => t.language === 'UZ')?.miniDescription}
@@ -269,11 +235,10 @@ export default function PlatformGiftsPage() {
                                         {getUZMiniDesc(gift.translations)}
                                     </p>
 
-                                    {/* Statistics */}
                                     <div className="w-full space-y-1 mb-2">
                                         <div className="flex items-center justify-between text-xs">
                                             <span className="text-gray-500">Category:</span>
-                                            <span className="text-purple-700 font-medium">{getCategoryName(gift.categoryId)} ta</span>
+                                            <span className="text-purple-700 font-medium">{getCategoryName(gift.categoryId)}</span>
                                         </div>
 
                                         {gift.amount > 0 && (
@@ -289,12 +254,12 @@ export default function PlatformGiftsPage() {
                                         </div>
 
                                         <div className="flex items-center justify-between text-xs">
-                                            <span className="text-gray-500">createdBy:</span>
+                                            <span className="text-gray-500">Yaratdi:</span>
                                             <span className="font-medium">{gift.createdBy.firstname} {gift.createdBy.lastname}</span>
                                         </div>
 
                                         <div className="flex items-center justify-between text-xs">
-                                            <span className="text-gray-500">date:</span>
+                                            <span className="text-gray-500">Sana:</span>
                                             <span className="font-medium">{new Date(gift.createdAt).toLocaleDateString('uz-UZ')}</span>
                                         </div>
                                     </div>
@@ -303,28 +268,11 @@ export default function PlatformGiftsPage() {
                         ))}
                     </div>
 
-                    {/* Pagination */}
                     {pagination && (
                         <div className="mt-6 flex items-center justify-between text-sm text-gray-600">
                             <span>
                                 Sahifa {pagination.pageNumber} / {pagination.pageCount} | Jami: {pagination.count} ta
                             </span>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => handlePageChange(pagination.pageNumber - 1)}
-                                    disabled={pagination.pageNumber === 1}
-                                    className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
-                                >
-                                    Oldingi
-                                </button>
-                                <button
-                                    onClick={() => handlePageChange(pagination.pageNumber + 1)}
-                                    disabled={pagination.pageNumber === pagination.pageCount}
-                                    className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
-                                >
-                                    Keyingi
-                                </button>
-                            </div>
                         </div>
                     )}
                 </>
@@ -343,12 +291,11 @@ export default function PlatformGiftsPage() {
                 platformGift={editGift}
             />
 
-
             <DeleteConfirmModal
                 open={!!deleteId}
                 onClose={() => setDeleteId(null)}
                 onConfirm={confirmDelete}
-                message="Rostdan ham bu tavsiyani o'chirmoqchimisiz?"
+                message="Rostdan ham bu sovg'ani o'chirmoqchimisiz?"
             />
         </div>
     );

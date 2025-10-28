@@ -23,18 +23,10 @@ function Navbar() {
         setAnchorEl(null);
     };
 
-    const handleProfile = () => {
-        console.log('Profile clicked');
-        handleClose();
-    };
-
     const handleLogout = () => {
         localStorage.removeItem('accessToken');
-
         handleClose();
-
         router.push('/auth/login');
-
     };
 
     return (
@@ -55,20 +47,9 @@ function Navbar() {
                     </h1>
                 </div>
 
-                {/* O'ng tomon - Foydalanuvchi profili */}
                 <div
                     className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-all"
                     onClick={handleClick}
-                    aria-controls={open ? 'profile-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            handleClick(e as any);
-                        }
-                    }}
                 >
                     <Avatar
                         alt="User Name"
@@ -87,7 +68,6 @@ function Navbar() {
                 </div>
 
                 <Menu
-                    id="profile-menu"
                     anchorEl={anchorEl}
                     open={open}
                     onClose={handleClose}
@@ -103,7 +83,7 @@ function Navbar() {
                     }}
                 >
                     <MenuItem
-                        onClick={handleProfile}
+                        onClick={handleClose}
                         sx={{
                             py: 1.5,
                             px: 2,

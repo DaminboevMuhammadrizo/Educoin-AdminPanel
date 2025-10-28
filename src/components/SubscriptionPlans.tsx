@@ -79,14 +79,14 @@ export default function SubscriptionPlansPage() {
     }, []);
 
     const confirmDelete = async () => {
-        console.log(deleteId)
         if (!deleteId) return;
         try {
-            await axios.delete(`${baseUrl}/subscription-plans/${deleteId}`, {
+            const res = await axios.delete(`${baseUrl}/subscription-plans/${deleteId}`, {
                 headers: {
                     Authorization: `Bearer ${getAccessToken()}`
                 },
             });
+            console.log(res)
             setPlans(prev => prev.filter(plan => plan.id !== deleteId));
             setDeleteId(null);
             toast.success("Obuna plani o'chirildi");
