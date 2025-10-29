@@ -29,7 +29,6 @@ export default function LoginPage() {
                 phone: data.phone,
                 password: data.password,
             });
-            console.log(res)
 
             if (res.status === 200 && res.data?.data?.accessToken) {
                 localStorage.setItem('accessToken', res.data.data.accessToken);
