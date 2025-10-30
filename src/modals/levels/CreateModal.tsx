@@ -139,7 +139,6 @@ export default function CreateLevelModal({ open, onClose, onSuccess }: CreateLev
         }
     };
 
-    // Color input uchun # bilan qiymat
     const getColorInputValue = () => {
         return `#${formData.color}`;
     };
@@ -149,7 +148,7 @@ export default function CreateLevelModal({ open, onClose, onSuccess }: CreateLev
     return (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/40" onClick={onClose}>
             <div className="w-full sm:w-[500px] h-full bg-white overflow-y-auto" onClick={e => e.stopPropagation()}>
-                <div className="flex justify-between items-center p-4 border-b bg-gradient-to-r from-purple-50 to-blue-50">
+                <div className="flex justify-between items-center p-4 border-b from-purple-50 to-blue-50">
                     <h2 className="text-lg font-semibold text-gray-800">Yangi daraja qoʻshish</h2>
                     <button
                         onClick={onClose}
@@ -193,7 +192,7 @@ export default function CreateLevelModal({ open, onClose, onSuccess }: CreateLev
 
                             {/* Rang tanlash */}
                             <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300">
-                                <label className="block text-sm font-semibold mb-3 text-gray-700 flex items-center gap-2">
+                                <label className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-2">
                                     <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                                     </svg>
@@ -209,7 +208,7 @@ export default function CreateLevelModal({ open, onClose, onSuccess }: CreateLev
                                             onChange={(e) => handleColorChange(e.target.value)}
                                             className="w-14 h-14 rounded-lg border border-gray-200 cursor-pointer shadow-sm hover:scale-105 transition-transform duration-300"
                                         />
-                                        <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/30 to-transparent pointer-events-none"></div>
+                                        <div className="absolute inset-0 rounded-lg from-white/30 to-transparent pointer-events-none"></div>
                                     </div>
 
                                     {/* Rang kodi va namuna */}

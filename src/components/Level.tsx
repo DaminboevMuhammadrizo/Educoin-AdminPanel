@@ -100,29 +100,9 @@ export default function LevelsPage() {
         return new Date(date).toLocaleDateString('uz-UZ');
     };
 
-    // Yangi: Hex rangni to'liq formatga o'tkazish
     const getFullColor = (color: string) => {
-        // Agar # bo'lsa olib tashlaymiz, yo'q bo'lsa o'zini qaytaramiz
         const cleanColor = color.startsWith('#') ? color.slice(1) : color;
         return `#${cleanColor}`;
-    };
-
-    const getColorName = (color: string) => {
-        const colorMap: { [key: string]: string } = {
-            'FF0000': 'Qizil',
-            '0000FF': 'Koʻk',
-            '008000': 'Yashil',
-            'FFFF00': 'Sariq',
-            '800080': 'Binafsha',
-            'FFC0CB': 'Pushti',
-            '4B0082': 'Indigo',
-            '008080': 'Moviy-yashil',
-            'FFA500': 'Olovrang',
-            '808080': 'Kulrang',
-        };
-
-        const cleanColor = color.startsWith('#') ? color.slice(1) : color;
-        return colorMap[cleanColor.toUpperCase()] || cleanColor;
     };
 
     return (
@@ -230,7 +210,7 @@ export default function LevelsPage() {
                                                             style={{ backgroundColor: fullColor }}
                                                         ></div>
                                                         <span className="text-sm text-gray-600">
-                                                            {getColorName(level.color)}
+                                                            {level.color}
                                                         </span>
                                                     </div>
                                                 </td>
