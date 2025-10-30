@@ -15,6 +15,7 @@ import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom';
 import ChildCareIcon from '@mui/icons-material/ChildCare';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import GamesIcon from '@mui/icons-material/Games';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
 function Sidebar() {
     const router = useRouter();
@@ -32,8 +33,9 @@ function Sidebar() {
         { icon: <CardGiftcardIcon />, label: "Platforma sovg'alari", path: '/platform-gifts' },
         { icon: <CategoryIcon />, label: 'Kategoriyalar', path: '/categories' },
         { icon: <CardMembershipIcon />, label: 'Obuna rejalari', path: '/subscription-plans' },
-        { icon: <SportsEsportsIcon />, label: 'Oʻyinlar', path: '/games' },
+        { icon: <TrendingUpIcon />, label: 'Darajalar', path: '/levels' },
         { icon: <GamesIcon />, label: 'Oʻyin kategoriyalari', path: '/game-categories' },
+        { icon: <SportsEsportsIcon />, label: 'Oʻyinlar', path: '/games' },
         { icon: <NotificationsIcon />, label: 'Bildirishnomalar', path: '/notifications' },
         { icon: <PaymentIcon />, label: "To'lovlar", path: '/payments' },
     ];
