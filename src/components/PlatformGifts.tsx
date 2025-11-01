@@ -44,6 +44,7 @@ interface Gift {
 
 export default function PlatformGiftsPage() {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    const imgUrl = process.env.NEXT_PUBLIC_IMG_URL;
 
     const [gifts, setGifts] = useState<Gift[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
@@ -54,6 +55,19 @@ export default function PlatformGiftsPage() {
     const [openModal, setOpenModal] = useState(false);
     const [hovered, setHovered] = useState<string | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<string>('');
+
+    // Rasm URL ni to'g'ri formatga o'tkazish funksiyasi
+    const getImageUrl = (photoPath: string): string => {
+        if (!photoPath) return '';
+
+        if (photoPath.startsWith('http')) return photoPath;
+
+        if (photoPath.startsWith('/')) {
+            return `${imgUrl}${photoPath}`;
+        }
+
+        return `${imgUrl}/${photoPath}`;
+    };
 
     const fetchCategories = async () => {
         try {
@@ -212,9 +226,20 @@ export default function PlatformGiftsPage() {
                                     >
                                         {gift.photo ? (
                                             <img
-                                                src={gift.photo}
+                                                src={getImageUrl(gift.photo)} // getImageUrl ni qo'llash
                                                 alt={getUZTitle(gift.translations)}
                                                 className="w-8 h-8 object-contain"
+                                                onError={(e) => {
+                                                    // Rasm yuklanmasa, default icon ko'rsatish
+                                                    e.currentTarget.style.display = 'none';
+                                                    const parent = e.currentTarget.parentElement;
+                                                    if (parent) {
+                                                        const fallback = document.createElement('span');
+                                                        fallback.className = 'text-2xl';
+                                                        fallback.textContent = '🎁';
+                                                        parent.appendChild(fallback);
+                                                    }
+                                                }}
                                             />
                                         ) : (
                                             <span className="text-2xl">🎁</span>

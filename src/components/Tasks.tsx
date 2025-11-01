@@ -1,183 +1,140 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ChildIcon from '@mui/icons-material/ChildCare';
+import CircularProgress from '@mui/material/CircularProgress';
+import { getAccessToken } from '@/utils/getToken';
+import toast from 'react-hot-toast';
 
-const mockTasks = {
-    statusCode: 200,
-    success: true,
-    data: [
-        {
-            id: "1",
-            title: "Matematika vazifasi",
-            desc: "5 ta masala yechish",
-            coin: 50,
-            dueDate: "2025-09-21T00:00:00.000Z",
-            children: [
-                { id: "child1" },
-                { id: "child2" }
-            ]
-        },
-        {
-            id: "2",
-            title: "Kitob o'qish",
-            desc: "Kuniga 10 bet kitob o'qish",
-            coin: 30,
-            dueDate: "2025-09-22T00:00:00.000Z",
-            children: [
-                { id: "child1" }
-            ]
-        },
-        {
-            id: "3",
-            title: "Sport mashg'uloti",
-            desc: "30 daqiqa jismoniy mashq",
-            coin: 25,
-            dueDate: "2025-09-23T00:00:00.000Z",
-            children: [
-                { id: "child1" },
-                { id: "child2" },
-                { id: "child3" }
-            ]
-        },
-        {
-            id: "4",
-            title: "Uy vazifasi",
-            desc: "Darslikdagi barcha topshiriqlar",
-            coin: 40,
-            dueDate: "2025-09-24T00:00:00.000Z",
-            children: [
-                { id: "child1" }
-            ]
-        },
-        {
-            id: "5",
-            title: "Loyiha ishi",
-            desc: "Science loyihasini tayyorlash",
-            coin: 100,
-            dueDate: "2025-09-25T00:00:00.000Z",
-            children: [
-                { id: "child1" },
-                { id: "child2" }
-            ]
-        }
-    ]
-};
+interface CreatedBy {
+  id: string;
+  firstname: string;
+  lastname: string;
+}
+
+interface Task {
+  id: string;
+  title: string;
+  desc: string;
+  coin: number;
+  dueDate: string;
+  createdBy: CreatedBy;
+  createdAt: string;
+}
 
 export default function TasksPage() {
-    const [isClient, setIsClient] = useState(false);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
-    useEffect(() => {
-        setIsClient(true);
-    }, []);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    const tasks = mockTasks.data;
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${baseUrl}/tasks/admin`, {
+        headers: {
+          Authorization: `Bearer ${getAccessToken()}`,
+          'Content-Type': 'application/json'
+        },
+      });
 
-    const formatDate = (date: string) => {
-        if (!isClient) return '';
-        return new Date(date).toLocaleDateString('uz-UZ').replaceAll('/', '.');
-    };
+      if (res.data.success && res.data.data.data) {
+        setTasks(res.data.data.data);
+      } else {
+        throw new Error('Ma\'lumotlar formati noto\'g\'ri');
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Xatolik yuz berdi');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleEdit = (id: string) => console.log('Edit:', id);
-    const handleDelete = (id: string) => console.log('Delete:', id);
-    const handleAdd = () => console.log('Add new task');
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
-    return (
-        <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Vazifalar</h1>
-                    <p className="text-gray-500 text-sm mt-1">
-                        Jami {tasks.length} ta vazifa
-                    </p>
-                </div>
-                <button
-                    onClick={handleAdd}
-                    className="flex items-center gap-2 px-4 py-2 text-white font-semibold rounded-lg"
-                    style={{ background: 'linear-gradient(135deg, #69569F, #8B7AB8)' }}
-                >
-                    <AddIcon sx={{ fontSize: 20 }} />
-                    <span>Qo&apos;shish</span>
-                </button>
-            </div>
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString('uz-UZ').replaceAll('/', '.');
+  };
 
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Vazifa
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Tavsif
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Coin
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Muddat
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Farzandlar
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Harakatlar
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {tasks.map((task) => (
-                            <tr key={task.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-medium text-gray-900">
-                                        {task.title}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="text-sm text-gray-600 max-w-xs truncate">
-                                        {task.desc}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-semibold text-yellow-600 flex items-center gap-1">
-                                        🪙 {task.coin}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm text-gray-600">
-                                        {formatDate(task.dueDate)}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm text-blue-600 flex items-center gap-1">
-                                        <ChildIcon sx={{ fontSize: 16 }} />
-                                        {task.children.length} ta
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => handleEdit(task.id)}
-                                            className="text-gray-600 hover:text-blue-600 p-1 rounded"
-                                        >
-                                            <EditIcon sx={{ fontSize: 18 }} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(task.id)}
-                                            className="text-gray-600 hover:text-red-600 p-1 rounded"
-                                        >
-                                            <DeleteIcon sx={{ fontSize: 18 }} />
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+  const handleAdd = () => {
+    // Bu yerda yangi task qo'shish modalini ochishingiz mumkin
+    console.log('Add new task');
+  };
+
+  return (
+    <div className="p-6">
+
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <CircularProgress sx={{ color: '#7C6BB3' }} />
         </div>
-    );
+      ) : (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Vazifa
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tavsif
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Coin
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Muddat
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Yaratuvchi
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Yaratilgan sana
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {tasks.map((task) => (
+                <tr key={task.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
+                      {task.title}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-600 max-w-xs truncate">
+                      {task.desc}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-semibold text-yellow-600 flex items-center gap-1">
+                      🪙 {task.coin}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-600">
+                      {formatDate(task.dueDate)}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-blue-600">
+                      {task.createdBy.firstname} {task.createdBy.lastname}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-600">
+                      {formatDate(task.createdAt)}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
 }

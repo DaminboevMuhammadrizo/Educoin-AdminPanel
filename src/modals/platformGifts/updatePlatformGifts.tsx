@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { CircularProgress } from '@mui/material';
 import axios from 'axios';
 import { getAccessToken } from '@/utils/getToken';
 import toast from 'react-hot-toast';
@@ -36,6 +38,7 @@ interface Translation {
 
 export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, platformGift }: Props) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const imgUrl = process.env.NEXT_PUBLIC_IMG_URL;
 
   const [translations, setTranslations] = useState<Translation[]>([
     { language: 'UZ', title: '', miniDescription: '', description: '' },
@@ -48,6 +51,21 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
   const [categoryId, setCategoryId] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
+
+  // Rasm URL ni to'g'ri formatga o'tkazish
+  const getImageUrl = (photoPath: string): string => {
+    if (!photoPath) return '';
+
+    if (photoPath.startsWith('http')) return photoPath;
+
+    if (photoPath.startsWith('/')) {
+      return `${imgUrl}${photoPath}`;
+    }
+
+    return `${imgUrl}/${photoPath}`;
+  };
 
   useEffect(() => {
     if (open) fetchCategories();
@@ -79,6 +97,11 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
       setCount(String(platformGift.count || ''));
       setAmount(String(platformGift.amount || ''));
       setCategoryId(platformGift.categoryId || '');
+
+      // Preview URL ni ham to'g'ri formatda o'rnatish
+      if (platformGift.photo) {
+        setPreviewUrl(getImageUrl(platformGift.photo));
+      }
     }
   }, [platformGift, open]);
 
@@ -93,8 +116,50 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
       setCount('');
       setAmount('');
       setCategoryId('');
+      setPreviewUrl('');
     }
   }, [open]);
+
+  // Rasm yuklash funksiyasi
+  const handleFileUpload = async (file: File) => {
+    try {
+      setUploading(true);
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+
+      const response = await axios.post(`${baseUrl}/platform-gifts/file`, uploadFormData, {
+        headers: {
+          Authorization: `Bearer ${getAccessToken()}`,
+          'Content-Type': 'multipart/form-data'
+        },
+      });
+
+      if (response.data.success) {
+        const imageUrl = response.data.data.url;
+        setPhoto(imageUrl);
+        setPreviewUrl(getImageUrl(imageUrl));
+        toast.success('Rasm muvaffaqiyatli yuklandi');
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Rasm yuklashda xatolik');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+  };
+
+  // Butun div bosilganda file inputni ishga tushirish
+  const handleDivClick = () => {
+    if (!uploading) {
+      document.getElementById('file-upload-input-update')?.click();
+    }
+  };
 
   const handleTranslationChange = (language: string, field: 'title' | 'miniDescription' | 'description', value: string) => {
     const maxLength = field === 'title' ? 32 : field === 'miniDescription' ? 64 : 256;
@@ -253,22 +318,68 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
             ))}
           </div>
 
-          {/* Photo URL */}
+          {/* Photo Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Rasm URL *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Rasm Yuklash *
+            </label>
+            <div
+              className={`border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition-colors ${
+                uploading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              onClick={handleDivClick}
+            >
+              {previewUrl ? (
+                <div className="mb-4">
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
+                    className="mx-auto h-32 w-32 object-cover rounded-lg"
+                    onError={(e) => {
+                      // Rasm yuklanmasa, default ko'rsatkichni ko'rsatish
+                      e.currentTarget.style.display = 'none';
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        const fallback = document.createElement('div');
+                        fallback.className = 'w-full h-32 flex items-center justify-center';
+                        fallback.innerHTML = '<span class="text-3xl">🎁</span>';
+                        parent.appendChild(fallback);
+                      }
+                    }}
+                  />
+                  <p className="text-sm text-green-600 mt-2">
+                    {platformGift?.photo === photo ? 'Joriy rasm' : 'Yangi rasm yuklandi'}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {uploading ? 'Yangi rasm yuklanmoqda...' : 'Rasmni almashtirish uchun bosing'}
+                  </p>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <CloudUploadIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="mt-4 text-sm text-gray-600">
+                    <span className="text-purple-600 hover:text-purple-500 font-medium">
+                      Rasm yuklash
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">PNG, JPG, JPEG fayllar</p>
+                </div>
+              )}
+              {uploading && (
+                <div className="mt-2">
+                  <CircularProgress size={20} sx={{ color: '#7C6BB3' }} />
+                  <p className="text-xs text-gray-500 mt-1">Yuklanmoqda...</p>
+                </div>
+              )}
+            </div>
             <input
-              type="url"
-              value={photo}
-              onChange={(e) => setPhoto(e.target.value)}
-              placeholder="https://example.com/image.png"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900"
-              required
+              id="file-upload-input-update"
+              type="file"
+              className="sr-only"
+              accept="image/*"
+              onChange={handleFileChange}
+              disabled={uploading}
             />
-            {photo && (
-              <div className="mt-2 p-2 border rounded-lg">
-                <img src={photo} alt="Preview" className="w-16 h-16 object-contain mx-auto" />
-              </div>
-            )}
           </div>
 
           {/* Category */}
@@ -323,13 +434,13 @@ export default function UpdatePlatformGiftModal({ open, onClose, onSuccess, plat
               type="button"
               onClick={onClose}
               className="px-4 py-2 text-sm text-gray-700 font-medium rounded border border-gray-300 hover:bg-gray-50"
-              disabled={loading}
+              disabled={loading || uploading}
             >
               Bekor qilish
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || uploading}
               className="px-4 py-2 text-sm bg-gray-900 hover:bg-gray-800 text-white font-medium rounded disabled:opacity-50"
             >
               {loading ? 'Yuklanmoqda...' : "Yangilash"}
