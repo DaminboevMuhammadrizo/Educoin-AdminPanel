@@ -68,27 +68,18 @@ export const UpdateWordGameModal: React.FC<UpdateWordGameModalProps> = ({
     });
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>('');
 
-    // Rasm URL ni to'g'ri formatga o'tkazish
     const getImageUrl = (photoPath: string): string => {
         if (!photoPath) return '';
-
         if (photoPath.startsWith('http')) return photoPath;
-
-        if (photoPath.startsWith('/')) {
-            return `${imgUrl}${photoPath}`;
-        }
-
+        if (photoPath.startsWith('/')) return `${imgUrl}${photoPath}`;
         return `${imgUrl}/${photoPath}`;
     };
 
-    // Game prop o'zgarganda formani to'ldirish
     useEffect(() => {
         if (game) {
             const fullPhotoUrl = getImageUrl(game.photo || '');
-
             setFormData({
                 photo: game.photo || '',
                 categoryId: game.categoryId,
@@ -106,7 +97,6 @@ export const UpdateWordGameModal: React.FC<UpdateWordGameModalProps> = ({
         }
     }, [game]);
 
-    // File upload handler
     const handleFileUpload = async (file: File) => {
         try {
             setUploading(true);
@@ -122,8 +112,7 @@ export const UpdateWordGameModal: React.FC<UpdateWordGameModalProps> = ({
 
             if (response.data.success) {
                 const imageUrl = response.data.data.url;
-                const fullImageUrl = getImageUrl(imageUrl); // Yangi rasm URL ni ham formatlash
-
+                const fullImageUrl = getImageUrl(imageUrl);
                 setFormData(prev => ({ ...prev, photo: imageUrl }));
                 setPreviewUrl(fullImageUrl);
                 toast.success('Rasm muvaffaqiyatli yuklandi');
@@ -137,24 +126,15 @@ export const UpdateWordGameModal: React.FC<UpdateWordGameModalProps> = ({
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            setSelectedFile(file);
-            handleFileUpload(file);
-        }
+        if (file) handleFileUpload(file);
     };
 
-    // Yangi funksiya: butun div bosilganda file inputni ishga tushirish
     const handleDivClick = () => {
-        if (!uploading) {
-            document.getElementById('file-upload-input-update')?.click();
-        }
+        if (!uploading) document.getElementById('file-upload-input-update')?.click();
     };
 
-    // Modal tashqarisini bosganda yopish
     const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (e.target === e.currentTarget) {
-            onClose();
-        }
+        if (e.target === e.currentTarget) onClose();
     };
 
     const handleTranslationChange = (index: number, value: string) => {
@@ -179,10 +159,8 @@ export const UpdateWordGameModal: React.FC<UpdateWordGameModalProps> = ({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!game) return;
 
-        // Validation
         if (!formData.categoryId) {
             toast.error('Kategoriyani tanlang');
             return;
@@ -205,8 +183,6 @@ export const UpdateWordGameModal: React.FC<UpdateWordGameModalProps> = ({
 
         try {
             setLoading(true);
-
-            // PATCH so'rovini yuborish
             await axios.patch(`${baseUrl}/word-games/${game.id}`, formData, {
                 headers: {
                     Authorization: `Bearer ${getAccessToken()}`,
@@ -217,7 +193,6 @@ export const UpdateWordGameModal: React.FC<UpdateWordGameModalProps> = ({
             toast.success('O\'yin muvaffaqiyatli yangilandi');
             onSuccess();
             onClose();
-
         } catch (err: any) {
             toast.error(err.response?.data?.message || 'Xatolik yuz berdi');
         } finally {
@@ -228,30 +203,18 @@ export const UpdateWordGameModal: React.FC<UpdateWordGameModalProps> = ({
     if (!open || !game) return null;
 
     return (
-        <div
-            className="fixed inset-0 z-50 flex justify-end bg-black/50"
-            onClick={handleBackdropClick}
-        >
-            <div
-                className="bg-white w-full max-w-md h-full overflow-y-auto"
-                onClick={(e) => e.stopPropagation()}
-            >
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/50" onClick={handleBackdropClick}>
+            <div className="bg-white w-full max-w-md h-full overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                 <div className="flex justify-between items-center p-6 border-b border-gray-200">
                     <h3 className="text-xl font-semibold">So'z O'yinini Tahrirlash</h3>
-                    <button
-                        onClick={onClose}
-                        className="p-1 hover:bg-gray-100 rounded"
-                    >
+                    <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
                         <CloseIcon />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                    {/* Category Selection */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Kategoriya *
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Kategoriya *</label>
                         <select
                             value={formData.categoryId}
                             onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
@@ -267,14 +230,10 @@ export const UpdateWordGameModal: React.FC<UpdateWordGameModalProps> = ({
                         </select>
                     </div>
 
-                    {/* Photo Upload */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Rasm Yuklash
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Rasm Yuklash</label>
                         <div
-                            className={`border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition-colors ${uploading ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
+                            className={`border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 transition-colors ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             onClick={handleDivClick}
                         >
                             {previewUrl ? (
@@ -284,7 +243,6 @@ export const UpdateWordGameModal: React.FC<UpdateWordGameModalProps> = ({
                                         alt="Preview"
                                         className="mx-auto h-32 w-32 object-cover rounded-lg"
                                         onError={(e) => {
-                                            // Rasm yuklanmasa, default ko'rsatkichni ko'rsatish
                                             e.currentTarget.style.display = 'none';
                                             const parent = e.currentTarget.parentElement;
                                             if (parent) {
@@ -306,9 +264,7 @@ export const UpdateWordGameModal: React.FC<UpdateWordGameModalProps> = ({
                                 <div className="text-center">
                                     <CloudUploadIcon className="mx-auto h-12 w-12 text-gray-400" />
                                     <div className="mt-4 text-sm text-gray-600">
-                                        <span className="text-purple-600 hover:text-purple-500 font-medium">
-                                            Rasm yuklash
-                                        </span>
+                                        <span className="text-purple-600 hover:text-purple-500 font-medium">Rasm yuklash</span>
                                     </div>
                                     <p className="text-xs text-gray-500 mt-2">PNG, JPG, JPEG fayllar</p>
                                 </div>
@@ -320,7 +276,6 @@ export const UpdateWordGameModal: React.FC<UpdateWordGameModalProps> = ({
                                 </div>
                             )}
                         </div>
-                        {/* Yashirin file input */}
                         <input
                             id="file-upload-input-update"
                             type="file"
@@ -331,16 +286,11 @@ export const UpdateWordGameModal: React.FC<UpdateWordGameModalProps> = ({
                         />
                     </div>
 
-                    {/* Translations */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Savol Matni *
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Savol Matni *</label>
                         {formData.translations.map((translation, index) => (
                             <div key={translation.language} className="flex items-center gap-2 mb-3">
-                                <span className="w-12 text-sm font-medium text-gray-600">
-                                    {translation.language}:
-                                </span>
+                                <span className="w-12 text-sm font-medium text-gray-600">{translation.language}:</span>
                                 <input
                                     type="text"
                                     value={translation.title}
@@ -353,11 +303,8 @@ export const UpdateWordGameModal: React.FC<UpdateWordGameModalProps> = ({
                         ))}
                     </div>
 
-                    {/* Options */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Variantlar *
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Variantlar *</label>
                         {formData.options.map((option, index) => (
                             <div key={index} className="flex items-center gap-2 mb-3">
                                 <input
@@ -377,12 +324,9 @@ export const UpdateWordGameModal: React.FC<UpdateWordGameModalProps> = ({
                                 />
                             </div>
                         ))}
-                        <p className="text-xs text-gray-500 mt-1">
-                            To'g'ri javobni belgilash uchun radiogani bosing
-                        </p>
+                        <p className="text-xs text-gray-500 mt-1">To'g'ri javobni belgilash uchun radiogani bosing</p>
                     </div>
 
-                    {/* Buttons */}
                     <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
                         <button
                             type="button"

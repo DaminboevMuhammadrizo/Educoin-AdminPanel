@@ -50,10 +50,8 @@ export const CreateWordGameModal: React.FC<CreateWordGameModalProps> = ({
     });
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>('');
 
-    // File upload handler
     const handleFileUpload = async (file: File) => {
         try {
             setUploading(true);
@@ -83,12 +81,10 @@ export const CreateWordGameModal: React.FC<CreateWordGameModalProps> = ({
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setSelectedFile(file);
             handleFileUpload(file);
         }
     };
 
-    // Yangi funksiya: butun div bosilganda file inputni ishga tushirish
     const handleDivClick = () => {
         if (!uploading) {
             document.getElementById('file-upload-input')?.click();
@@ -118,7 +114,6 @@ export const CreateWordGameModal: React.FC<CreateWordGameModalProps> = ({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validation
         if (!formData.categoryId) {
             toast.error('Kategoriyani tanlang');
             return;
@@ -151,7 +146,6 @@ export const CreateWordGameModal: React.FC<CreateWordGameModalProps> = ({
             toast.success('Yangi o\'yin muvaffaqiyatli qo\'shildi');
             onSuccess();
             onClose();
-            // Reset form
             setFormData({
                 photo: '',
                 categoryId: '',
@@ -166,7 +160,6 @@ export const CreateWordGameModal: React.FC<CreateWordGameModalProps> = ({
                     { title: '', isCorrect: true }
                 ]
             });
-            setSelectedFile(null);
             setPreviewUrl('');
         } catch (err: any) {
             toast.error(err.response?.data?.message || 'Xatolik yuz berdi');
@@ -191,7 +184,6 @@ export const CreateWordGameModal: React.FC<CreateWordGameModalProps> = ({
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                    {/* Category Selection */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Kategoriya *
@@ -211,7 +203,6 @@ export const CreateWordGameModal: React.FC<CreateWordGameModalProps> = ({
                         </select>
                     </div>
 
-                    {/* Photo Upload */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Rasm Yuklash
@@ -252,7 +243,6 @@ export const CreateWordGameModal: React.FC<CreateWordGameModalProps> = ({
                                 </div>
                             )}
                         </div>
-                        {/* Yashirin file input */}
                         <input
                             id="file-upload-input"
                             type="file"
@@ -263,7 +253,6 @@ export const CreateWordGameModal: React.FC<CreateWordGameModalProps> = ({
                         />
                     </div>
 
-                    {/* Translations */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Savol Matni *
@@ -285,7 +274,6 @@ export const CreateWordGameModal: React.FC<CreateWordGameModalProps> = ({
                         ))}
                     </div>
 
-                    {/* Options */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Variantlar *
@@ -314,7 +302,6 @@ export const CreateWordGameModal: React.FC<CreateWordGameModalProps> = ({
                         </p>
                     </div>
 
-                    {/* Buttons */}
                     <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
                         <button
                             type="button"

@@ -54,8 +54,7 @@ export default function CreateGameCategoryModal({ open, onClose, onSuccess }: Pr
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            // Fayl hajmini tekshirish (1MB limit)
-            const maxSize = 1 * 1024 * 1024; // 1MB
+            const maxSize = 1 * 1024 * 1024;
             if (file.size > maxSize) {
                 toast.error(`Fayl hajmi 1MB dan katta! Sizning faylingiz: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
                 return;
@@ -82,7 +81,6 @@ export default function CreateGameCategoryModal({ open, onClose, onSuccess }: Pr
 
         setLoading(true);
         try {
-            // 1. Rasmni serverga yuklash
             const imageForm = new FormData();
             imageForm.append('file', photo);
 
@@ -99,7 +97,6 @@ export default function CreateGameCategoryModal({ open, onClose, onSuccess }: Pr
                 throw new Error('Rasm yuklashda xatolik');
             }
 
-            // 2. Kategoriyani yaratish
             const categoryData = {
                 photo: photoUrl,
                 translations: translations.map(t => ({
@@ -144,7 +141,6 @@ export default function CreateGameCategoryModal({ open, onClose, onSuccess }: Pr
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-4">
-                    {/* Rasm yuklash */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Rasm *
@@ -187,7 +183,6 @@ export default function CreateGameCategoryModal({ open, onClose, onSuccess }: Pr
                         </div>
                     </div>
 
-                    {/* 3 ta title birga */}
                     <div className="space-y-3">
                         <label className="block text-sm font-medium text-gray-700">Kategoriya nomi *</label>
 

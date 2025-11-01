@@ -13,7 +13,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import toast from 'react-hot-toast';
 import ParentDetail from '@/modals/parent/getView';
 
-// API dan keladigan ma'lumotlar strukturasi
 interface PremiumPlanTranslation {
   id: string;
   language: string;
@@ -49,18 +48,6 @@ interface PaginationInfo {
   pageSize: number;
 }
 
-interface ParentsResponse {
-  statusCode: number;
-  success: boolean;
-  data: {
-    data: Parent[];
-    meta: {
-      pagination: PaginationInfo;
-    };
-  };
-}
-
-// Delete tasdiqlash modali
 interface DeleteConfirmModalProps {
   open: boolean;
   onClose: () => void;
@@ -96,7 +83,6 @@ function DeleteConfirmModal({ open, onClose, onConfirm, parentName }: DeleteConf
   );
 }
 
-
 export default function ParentsPage() {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || ''
   const imgUrl = process.env.NEXT_PUBLIC_IMG_URL || ''
@@ -115,20 +101,10 @@ export default function ParentsPage() {
     pageSize: 10
   });
 
-  // Agar ota-ona tanlangan bo'lsa, faqat shu ota-onani ko'rsatish
-  const showDetailView = selectedParent !== null;
-
-  // Rasm URL ni to'g'ri formatga o'tkazish
   const getImageUrl = (photoPath: string | null): string => {
     if (!photoPath) return '';
-
     if (photoPath.startsWith('http')) return photoPath;
-
-    if (photoPath.startsWith('/')) {
-      return `${imgUrl}${photoPath}`;
-    }
-
-    return `${imgUrl}/${photoPath}`;
+    return photoPath.startsWith('/') ? `${imgUrl}${photoPath}` : `${imgUrl}/${photoPath}`;
   };
 
   const fetchParents = async (page: number = 1, search: string = '') => {
@@ -139,12 +115,11 @@ export default function ParentsPage() {
         pageSize: 10
       };
 
-      // Agar search query bo'lsa, params ga qo'shamiz
       if (search.trim()) {
         params.search = search.trim();
       }
 
-      const response = await axios.get<ParentsResponse>(`${baseUrl}/users/parents`, {
+      const response = await axios.get(`${baseUrl}/users/parents`, {
         headers: {
           Authorization: `Bearer ${getAccessToken()}`,
           'Content-Type': 'application/json'
@@ -169,12 +144,11 @@ export default function ParentsPage() {
     fetchParents(currentPage, searchQuery);
   }, [currentPage]);
 
-  // Search query o'zgarganda yangi ma'lumotlarni yuklash
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      setCurrentPage(1); // Search bo'lganda 1-sahifaga qaytish
+      setCurrentPage(1);
       fetchParents(1, searchQuery);
-    }, 500); // 500ms debounce
+    }, 500);
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
@@ -205,22 +179,16 @@ export default function ParentsPage() {
 
       toast.success('Ota-ona muvaffaqiyatli o\'chirildi');
       setDeleteId(null);
-      // O'chirilgandan so'ng ro'yxatni yangilash
       fetchParents(currentPage, searchQuery);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'O\'chirishda xatolik yuz berdi');
     }
   };
 
-  const handleAdd = () => {
-    console.log('Add new parent');
-  };
-
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
-  // Search inputni tozalash
   const handleClearSearch = () => {
     setSearchQuery('');
   };
@@ -238,18 +206,15 @@ export default function ParentsPage() {
     return translation ? translation.title : 'Premium';
   };
 
-  // Calculate row number based on current page
   const getRowNumber = (index: number) => {
     return (currentPage - 1) * pagination.pageSize + index + 1;
   };
 
-  // Generate page numbers for pagination
   const getPageNumbers = () => {
     const pages = [];
     const totalPages = pagination.pageCount;
     const current = currentPage;
 
-    // Show first page, last page, and pages around current page
     if (totalPages <= 7) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
@@ -274,12 +239,11 @@ export default function ParentsPage() {
     return pages;
   };
 
-  // Format date
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('uz-UZ');
   };
 
-  if (showDetailView) {
+  if (selectedParent) {
     return (
       <ParentDetail
         parent={selectedParent}
@@ -288,10 +252,8 @@ export default function ParentsPage() {
     );
   }
 
-  // Asosiy ro'yxat ko'rinishi
   return (
     <div className="p-6">
-      {/* Header with Search */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Ota-Onalar</h1>
@@ -305,28 +267,25 @@ export default function ParentsPage() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3">
-          {/* Search Input */}
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <SearchIcon className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="block w-full sm:w-64 pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-            />
-            {searchQuery && (
-              <button
-                onClick={handleClearSearch}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-              >
-                <ClearIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
-              </button>
-            )}
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <SearchIcon className="h-5 w-5 text-gray-400" />
           </div>
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="block w-full sm:w-64 pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+          />
+          {searchQuery && (
+            <button
+              onClick={handleClearSearch}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            >
+              <ClearIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -354,10 +313,8 @@ export default function ParentsPage() {
         </div>
       ) : (
         <>
-          {/* Table */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
             <table className="min-w-full divide-y divide-gray-200">
-              {/* Table Header */}
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
@@ -387,16 +344,13 @@ export default function ParentsPage() {
                 </tr>
               </thead>
 
-              {/* Table Body */}
               <tbody className="bg-white divide-y divide-gray-200">
                 {parents.map((parent, index) => (
                   <tr key={parent.id} className="hover:bg-gray-50 transition-colors">
-                    {/* T/R Number */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                       {getRowNumber(index)}
                     </td>
 
-                    {/* Parent Info */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div
@@ -412,7 +366,6 @@ export default function ParentsPage() {
                               alt={`${parent.firstname} ${parent.lastname}`}
                               onError={(e) => {
                                 e.currentTarget.style.display = 'none';
-                                // Rasm yuklanmasa, default icon ko'rsatish
                                 const parent = e.currentTarget.parentElement;
                                 if (parent) {
                                   parent.innerHTML = `
@@ -440,12 +393,10 @@ export default function ParentsPage() {
                       </div>
                     </td>
 
-                    {/* Phone */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {parent.phone}
                     </td>
 
-                    {/* Gender */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         {getGenderIcon(parent.gender)}
@@ -455,12 +406,10 @@ export default function ParentsPage() {
                       </div>
                     </td>
 
-                    {/* Children Count */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {parent._count.children} ta
                     </td>
 
-                    {/* Premium Plan */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
                         {getPremiumPlanTitle(parent.premiumPlan)}
@@ -470,28 +419,22 @@ export default function ParentsPage() {
                       </div>
                     </td>
 
-                    {/* Created Date */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {formatDate(parent.createdAt)}
                     </td>
 
-                    {/* Actions */}
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">
-                        {/* View Button */}
                         <button
                           onClick={() => handleView(parent)}
-                          className=" p-1 rounded transition-colors"
-                          title="Ko'rish"
+                          className="p-1 rounded transition-colors"
                         >
                           <VisibilityIcon sx={{ fontSize: 20 }} />
                         </button>
 
-                        {/* Delete Button */}
                         <button
                           onClick={() => handleDeleteClick(parent)}
-                          className=" p-1 rounded transition-colors"
-                          title="O'chirish"
+                          className="p-1 rounded transition-colors"
                         >
                           <DeleteIcon sx={{ fontSize: 20 }} />
                         </button>
@@ -503,10 +446,8 @@ export default function ParentsPage() {
             </table>
           </div>
 
-          {/* Pagination */}
           {pagination.pageCount > 1 && (
             <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 rounded-b-lg shadow-md">
-              {/* Page Info */}
               <div className="flex items-center gap-4 text-sm text-gray-700">
                 <span>
                   Sahifa <span className="font-semibold">{currentPage}</span> / <span className="font-semibold">{pagination.pageCount}</span>
@@ -517,9 +458,7 @@ export default function ParentsPage() {
                 </span>
               </div>
 
-              {/* Pagination Controls */}
               <div className="flex items-center gap-2">
-                {/* Previous Button */}
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
@@ -528,7 +467,6 @@ export default function ParentsPage() {
                   Oldingi
                 </button>
 
-                {/* Page Numbers */}
                 <div className="flex gap-1">
                   {getPageNumbers().map((page, index) => (
                     <button
@@ -548,7 +486,6 @@ export default function ParentsPage() {
                   ))}
                 </div>
 
-                {/* Next Button */}
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === pagination.pageCount}
@@ -562,7 +499,6 @@ export default function ParentsPage() {
         </>
       )}
 
-      {/* Delete Confirmation Modal */}
       <DeleteConfirmModal
         open={!!deleteId}
         onClose={() => setDeleteId(null)}

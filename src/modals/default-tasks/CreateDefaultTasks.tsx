@@ -113,7 +113,6 @@ export default function CreateDefaultTasksModal({ open, onClose, onSuccess }: Pr
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-4">
-                    {/* 3 ta title birga */}
                     <div className="space-y-3">
                         <label className="block text-sm font-medium text-gray-700">Sarlavha</label>
 
@@ -169,7 +168,6 @@ export default function CreateDefaultTasksModal({ open, onClose, onSuccess }: Pr
                         </div>
                     </div>
 
-                    {/* 3 ta description birga */}
                     <div className="space-y-3">
                         <label className="block text-sm font-medium text-gray-700">Tavsif</label>
 

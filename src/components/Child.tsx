@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getAccessToken } from '@/utils/getToken';
-import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import BoyIcon from '@mui/icons-material/Boy';
@@ -54,7 +53,6 @@ interface ApiResponse {
     };
 }
 
-
 interface DeleteConfirmModalProps {
     open: boolean;
     onClose: () => void;
@@ -72,10 +70,8 @@ function DeleteConfirmModal({ open, onClose, onConfirm, childName }: DeleteConfi
                 <p className="text-gray-600 mb-4 text-sm">
                     <span className="font-medium">{childName}</span> ismli bolani rostdan ham o'chirmoqchimisiz?
                 </p>
-                <p className="text-xs text-red-600 mb-4">
-                    Bu amalni ortga qaytarib bo'lmaydi!
-                </p>
-                <div className="flex justify-around gap-4">
+                <p className="text-xs text-red-600 mb-4">Bu amalni ortga qaytarib bo'lmaydi!</p>
+                <div className="flex gap-4">
                     <button
                         onClick={onClose}
                         className="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors flex-1"
@@ -93,8 +89,6 @@ function DeleteConfirmModal({ open, onClose, onConfirm, childName }: DeleteConfi
         </div>
     );
 }
-
-
 
 export default function ChildrenPage() {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
@@ -114,20 +108,10 @@ export default function ChildrenPage() {
         pageSize: 10
     });
 
-    // Agar bola tanlangan bo'lsa, faqat shu bolani ko'rsatish
-    const showDetailView = selectedChild !== null;
-
-    // Rasm URL ni to'g'ri formatga o'tkazish
     const getImageUrl = (photoPath: string | null): string => {
         if (!photoPath) return '';
-
         if (photoPath.startsWith('http')) return photoPath;
-
-        if (photoPath.startsWith('/')) {
-            return `${imgUrl}${photoPath}`;
-        }
-
-        return `${imgUrl}/${photoPath}`;
+        return photoPath.startsWith('/') ? `${imgUrl}${photoPath}` : `${imgUrl}/${photoPath}`;
     };
 
     const fetchChildren = async (page: number = 1, search: string = '') => {
@@ -138,7 +122,6 @@ export default function ChildrenPage() {
                 pageSize: 10
             };
 
-            // Agar search query bo'lsa, params ga qo'shamiz
             if (search.trim()) {
                 params.search = search.trim();
             }
@@ -168,13 +151,11 @@ export default function ChildrenPage() {
         fetchChildren(currentPage, searchQuery);
     }, [currentPage]);
 
-    // Search query o'zgarganda yangi ma'lumotlarni yuklash
     useEffect(() => {
-        // Search bo'yicha qidirishni debounce qilish
         const timeoutId = setTimeout(() => {
-            setCurrentPage(1); // Search bo'lganda 1-sahifaga qaytish
+            setCurrentPage(1);
             fetchChildren(1, searchQuery);
-        }, 500); // 500ms debounce
+        }, 500);
 
         return () => clearTimeout(timeoutId);
     }, [searchQuery]);
@@ -185,11 +166,6 @@ export default function ChildrenPage() {
 
     const handleBackToList = () => {
         setSelectedChild(null);
-    };
-
-    const handleEdit = (id: string) => {
-        console.log('Edit child:', id);
-        // Tahrirlash logikasi
     };
 
     const handleDeleteClick = (child: Child) => {
@@ -210,20 +186,14 @@ export default function ChildrenPage() {
 
             toast.success('Bola muvaffaqiyatli o\'chirildi');
             setDeleteId(null);
-            // O'chirilgandan so'ng ro'yxatni yangilash
             fetchChildren(currentPage, searchQuery);
         } catch (err: any) {
             toast.error(err.response?.data?.message || 'O\'chirishda xatolik yuz berdi');
         }
     };
 
-    const handleAdd = () => {
-        console.log('Add new child');
-    };
-
     const handlePageChange = (page: number) => setCurrentPage(page);
 
-    // Search inputni tozalash
     const handleClearSearch = () => {
         setSearchQuery('');
     };
@@ -257,12 +227,10 @@ export default function ChildrenPage() {
         return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
 
-    // Calculate row number based on current page
     const getRowNumber = (index: number) => {
         return (currentPage - 1) * pagination.pageSize + index + 1;
     };
 
-    // Generate page numbers for pagination
     const getPageNumbers = () => {
         const pages = [];
         const totalPages = pagination.pageCount;
@@ -292,56 +260,48 @@ export default function ChildrenPage() {
         return pages;
     };
 
-    // Agar bola tanlangan bo'lsa, faqat shu bolani ko'rsatish
-    if (showDetailView) {
+    if (selectedChild) {
         return (
             <ChildDetail
                 child={selectedChild}
                 onBack={handleBackToList}
-                onEdit={handleEdit}
+                onEdit={(id) => console.log('Edit child:', id)}
             />
         );
     }
 
-    // Asosiy ro'yxat ko'rinishi
     return (
         <div className="p-6">
-            {/* Header with Search */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">Bolalar</h1>
                     <p className="text-gray-500 text-sm mt-1">
                         Jami {pagination.count} ta bola | Sahifada {children.length} ta
                         {searchQuery && (
-                            <span className="text-purple-600 ml-2">
-                                ("{searchQuery}" bo'yicha qidiruv)
-                            </span>
+                            <span className="text-purple-600 ml-2">("{searchQuery}" bo'yicha qidiruv)</span>
                         )}
                     </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3">
-                    {/* Search Input */}
-                    <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <SearchIcon className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="block w-full sm:w-64 pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                        />
-                        {searchQuery && (
-                            <button
-                                onClick={handleClearSearch}
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                            >
-                                <ClearIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
-                            </button>
-                        )}
+                <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <SearchIcon className="h-5 w-5 text-gray-400" />
                     </div>
+                    <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="block w-full sm:w-64 pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                    />
+                    {searchQuery && (
+                        <button
+                            onClick={handleClearSearch}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                        >
+                            <ClearIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -369,46 +329,27 @@ export default function ChildrenPage() {
                 </div>
             ) : (
                 <>
-                    {/* Table */}
                     <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
                         <table className="min-w-full divide-y divide-gray-200">
-                            {/* Table Header */}
                             <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
-                                        T/R
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Bola
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Ota-Ona
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Jinsi
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Yosh
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Coin Balans
-                                    </th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Amallar
-                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">T/R</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bola</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ota-Ona</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jinsi</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Yosh</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coin Balans</th>
+                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amallar</th>
                                 </tr>
                             </thead>
 
-                            {/* Table Body */}
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {children.map((child, index) => (
                                     <tr key={child.id} className="hover:bg-gray-50 transition-colors">
-                                        {/* T/R Number */}
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                                             {getRowNumber(index)}
                                         </td>
 
-                                        {/* Child Info */}
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div
@@ -424,7 +365,6 @@ export default function ChildrenPage() {
                                                             alt={child.firstname}
                                                             onError={(e) => {
                                                                 e.currentTarget.style.display = 'none';
-                                                                // Rasm yuklanmasa, default icon ko'rsatish
                                                                 const parent = e.currentTarget.parentElement;
                                                                 if (parent) {
                                                                     parent.innerHTML = `
@@ -452,7 +392,6 @@ export default function ChildrenPage() {
                                             </div>
                                         </td>
 
-                                        {/* Parent Info */}
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm text-gray-900">
                                                 {child.parent ? (
@@ -465,7 +404,6 @@ export default function ChildrenPage() {
                                             </div>
                                         </td>
 
-                                        {/* Gender */}
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
                                                 {getGenderIcon(child.gender)}
@@ -475,7 +413,6 @@ export default function ChildrenPage() {
                                             </div>
                                         </td>
 
-                                        {/* Age */}
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm text-gray-900">
                                                 {calculateAge(child.birthDate)} yosh
@@ -485,7 +422,6 @@ export default function ChildrenPage() {
                                             </div>
                                         </td>
 
-                                        {/* Coin Balance */}
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="space-y-1">
                                                 <div className="flex items-center gap-2">
@@ -499,10 +435,8 @@ export default function ChildrenPage() {
                                             </div>
                                         </td>
 
-                                        {/* Actions */}
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex justify-end gap-2">
-                                                {/* View Button */}
                                                 <button
                                                     onClick={() => handleView(child)}
                                                     className="p-1 rounded transition-colors"
@@ -511,7 +445,6 @@ export default function ChildrenPage() {
                                                     <VisibilityIcon sx={{ fontSize: 20 }} />
                                                 </button>
 
-                                                {/* Delete Button */}
                                                 <button
                                                     onClick={() => handleDeleteClick(child)}
                                                     className="p-1 rounded transition-colors"
@@ -527,10 +460,8 @@ export default function ChildrenPage() {
                         </table>
                     </div>
 
-                    {/* Pagination */}
                     {pagination.pageCount > 1 && (
                         <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 rounded-b-lg shadow-md">
-                            {/* Page Info */}
                             <div className="flex items-center gap-4 text-sm text-gray-700">
                                 <span>
                                     Sahifa <span className="font-semibold">{currentPage}</span> / <span className="font-semibold">{pagination.pageCount}</span>
@@ -541,9 +472,7 @@ export default function ChildrenPage() {
                                 </span>
                             </div>
 
-                            {/* Pagination Controls */}
                             <div className="flex items-center gap-2">
-                                {/* Previous Button */}
                                 <button
                                     onClick={() => handlePageChange(currentPage - 1)}
                                     disabled={currentPage === 1}
@@ -552,7 +481,6 @@ export default function ChildrenPage() {
                                     Oldingi
                                 </button>
 
-                                {/* Page Numbers */}
                                 <div className="flex gap-1">
                                     {getPageNumbers().map((page, index) => (
                                         <button
@@ -572,7 +500,6 @@ export default function ChildrenPage() {
                                     ))}
                                 </div>
 
-                                {/* Next Button */}
                                 <button
                                     onClick={() => handlePageChange(currentPage + 1)}
                                     disabled={currentPage === pagination.pageCount}
@@ -586,7 +513,6 @@ export default function ChildrenPage() {
                 </>
             )}
 
-            {/* Delete Confirmation Modal */}
             <DeleteConfirmModal
                 open={!!deleteId}
                 onClose={() => setDeleteId(null)}

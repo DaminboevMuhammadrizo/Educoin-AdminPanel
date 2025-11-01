@@ -23,22 +23,6 @@ interface GameCategory {
     createdAt: string;
 }
 
-interface ApiResponse {
-    statusCode: number;
-    success: boolean;
-    data: {
-        data: GameCategory[];
-        meta: {
-            pagination: {
-                count: number;
-                pageCount: number;
-                pageNumber: number;
-                pageSize: number;
-            };
-        };
-    };
-}
-
 export default function GameCategoriesPage() {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     const imgUrl = process.env.NEXT_PUBLIC_IMG_URL;
@@ -52,20 +36,14 @@ export default function GameCategoriesPage() {
 
     const getImageUrl = (photoPath: string): string => {
         if (!photoPath) return '';
-
         if (photoPath.startsWith('http')) return photoPath;
-
-        if (photoPath.startsWith('/')) {
-            return `${imgUrl}${photoPath}`;
-        }
-
-        return `${imgUrl}/${photoPath}`;
+        return photoPath.startsWith('/') ? `${imgUrl}${photoPath}` : `${imgUrl}/${photoPath}`;
     };
 
     const fetchData = async () => {
         try {
             setLoading(true);
-            const response = await axios.get<ApiResponse>(`${baseUrl}/word-categories/admin`, {
+            const response = await axios.get(`${baseUrl}/word-categories/admin`, {
                 headers: { Authorization: `Bearer ${getAccessToken()}` },
             });
 
@@ -76,7 +54,6 @@ export default function GameCategoriesPage() {
                 toast.error('Maʼlumotlarni yuklashda xatolik');
             }
         } catch (err: any) {
-            console.log(err.response)
             toast.error(err.response?.data?.message || 'Xatolik yuz berdi');
         } finally {
             setLoading(false);
@@ -189,14 +166,13 @@ export default function GameCategoriesPage() {
                     {pagination && (
                         <div className="mt-6 flex items-center justify-between text-sm text-gray-600">
                             <span>
-                                Sahifa {pagination.pageNumber} / {pagination.pageCount} | Jami: {pagination.count} ta
+                                Sahifa {pagination.pageNumber} / {pagination.pageCount}
                             </span>
                         </div>
                     )}
                 </>
             )}
 
-            {/* Delete Confirmation Modal */}
             {deleteId && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                     <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
@@ -220,14 +196,12 @@ export default function GameCategoriesPage() {
                 </div>
             )}
 
-            {/* Create Modal */}
             <CreateGameCategoryModal
                 open={openModal}
                 onClose={() => setOpenModal(false)}
                 onSuccess={fetchData}
             />
 
-            {/* Update Modal */}
             <UpdateGameCategoryModal
                 open={!!editCategory}
                 onClose={() => setEditCategory(null)}

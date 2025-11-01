@@ -30,66 +30,6 @@ interface Child {
     createdAt: string;
 }
 
-interface ApiResponse {
-    statusCode: number;
-    success: boolean;
-    data: {
-        data: Child[];
-        meta: {
-            pagination: {
-                pageNumber: number;
-                pageSize: number;
-                count: number;
-                pageCount: number;
-            };
-        };
-    };
-}
-
-// Delete tasdiqlash modali
-interface DeleteConfirmModalProps {
-    open: boolean;
-    onClose: () => void;
-    onConfirm: () => void;
-    childName: string;
-}
-
-function DeleteConfirmModal({ open, onClose, onConfirm, childName }: DeleteConfirmModalProps) {
-    if (!open) return null;
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-                <div className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                        Bolani o'chirish
-                    </h3>
-                    <p className="text-gray-600">
-                        <span className="font-medium">{childName}</span> ismli bolani rostdan ham o'chirmoqchimisiz?
-                    </p>
-                    <p className="text-sm text-red-600 mt-2">
-                        Bu amalni ortga qaytarib bo'lmaydi!
-                    </p>
-                </div>
-                <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                        Bekor qilish
-                    </button>
-                    <button
-                        onClick={onConfirm}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                    >
-                        O'chirish
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-}
-
 interface ChildDetailProps {
     child: Child;
     onBack: () => void;
@@ -99,17 +39,10 @@ interface ChildDetailProps {
 export default function ChildDetail({ child, onBack, onEdit }: ChildDetailProps) {
     const imgUrl = process.env.NEXT_PUBLIC_IMG_URL;
 
-    // Rasm URL ni to'g'ri formatga o'tkazish
     const getImageUrl = (photoPath: string | null): string => {
         if (!photoPath) return '';
-
         if (photoPath.startsWith('http')) return photoPath;
-
-        if (photoPath.startsWith('/')) {
-            return `${imgUrl}${photoPath}`;
-        }
-
-        return `${imgUrl}/${photoPath}`;
+        return photoPath.startsWith('/') ? `${imgUrl}${photoPath}` : `${imgUrl}/${photoPath}`;
     };
 
     const getGenderIcon = (gender: string) => {
@@ -156,7 +89,6 @@ export default function ChildDetail({ child, onBack, onEdit }: ChildDetailProps)
 
     return (
         <div className="p-6">
-            {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-4">
                     <button
@@ -178,10 +110,8 @@ export default function ChildDetail({ child, onBack, onEdit }: ChildDetailProps)
             </div>
 
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                {/* Asosiy ma'lumotlar */}
                 <div className="p-6 border-b border-gray-200">
                     <div className="flex flex-col md:flex-row items-start gap-6">
-                        {/* Rasm */}
                         <div className="">
                             <div
                                 className="h-32 w-32 rounded-full flex items-center justify-center"
@@ -214,7 +144,6 @@ export default function ChildDetail({ child, onBack, onEdit }: ChildDetailProps)
                             </div>
                         </div>
 
-                        {/* Ma'lumotlar */}
                         <div className="flex-1">
                             <h2 className="text-2xl font-bold text-gray-800 mb-4">
                                 {child.firstname} {child.lastname || ''}
@@ -258,7 +187,6 @@ export default function ChildDetail({ child, onBack, onEdit }: ChildDetailProps)
                     </div>
                 </div>
 
-                {/* Coin balanslari */}
                 <div className="p-6 border-b border-gray-200">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Coin Balanslari</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -288,7 +216,6 @@ export default function ChildDetail({ child, onBack, onEdit }: ChildDetailProps)
                     </div>
                 </div>
 
-                {/* Ota-ona ma'lumotlari */}
                 {child.parent && (
                     <div className="p-6">
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Ota-Ona Ma'lumotlari</h3>

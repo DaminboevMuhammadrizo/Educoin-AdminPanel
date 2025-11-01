@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import AddIcon from '@mui/icons-material/Add';
 import CircularProgress from '@mui/material/CircularProgress';
 import { getAccessToken } from '@/utils/getToken';
 import toast from 'react-hot-toast';
@@ -59,14 +58,8 @@ export default function TasksPage() {
     return new Date(date).toLocaleDateString('uz-UZ').replaceAll('/', '.');
   };
 
-  const handleAdd = () => {
-    // Bu yerda yangi task qo'shish modalini ochishingiz mumkin
-    console.log('Add new task');
-  };
-
   return (
     <div className="p-6">
-
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <CircularProgress sx={{ color: '#7C6BB3' }} />

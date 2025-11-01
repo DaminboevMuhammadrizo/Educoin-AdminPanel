@@ -56,17 +56,10 @@ export default function PlatformGiftsPage() {
     const [hovered, setHovered] = useState<string | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<string>('');
 
-    // Rasm URL ni to'g'ri formatga o'tkazish funksiyasi
     const getImageUrl = (photoPath: string): string => {
         if (!photoPath) return '';
-
         if (photoPath.startsWith('http')) return photoPath;
-
-        if (photoPath.startsWith('/')) {
-            return `${imgUrl}${photoPath}`;
-        }
-
-        return `${imgUrl}/${photoPath}`;
+        return photoPath.startsWith('/') ? `${imgUrl}${photoPath}` : `${imgUrl}/${photoPath}`;
     };
 
     const fetchCategories = async () => {
@@ -245,17 +238,11 @@ export default function PlatformGiftsPage() {
                                         )}
                                     </div>
 
-                                    <h3
-                                        className="text-base font-semibold text-gray-800 mb-1 w-full"
-                                        title={gift.translations.find(t => t.language === 'UZ')?.title}
-                                    >
+                                    <h3 className="text-base font-semibold text-gray-800 mb-1 w-full">
                                         {getUZTitle(gift.translations)}
                                     </h3>
 
-                                    <p
-                                        className="text-xs text-gray-600 mb-2 w-full"
-                                        title={gift.translations.find(t => t.language === 'UZ')?.miniDescription}
-                                    >
+                                    <p className="text-xs text-gray-600 mb-2 w-full">
                                         {getUZMiniDesc(gift.translations)}
                                     </p>
 
@@ -295,7 +282,7 @@ export default function PlatformGiftsPage() {
                     {pagination && (
                         <div className="mt-6 flex items-center justify-between text-sm text-gray-600">
                             <span>
-                                Sahifa {pagination.pageNumber} / {pagination.pageCount} | Jami: {pagination.count} ta
+                                Sahifa {pagination.pageNumber} / {pagination.pageCount}
                             </span>
                         </div>
                     )}

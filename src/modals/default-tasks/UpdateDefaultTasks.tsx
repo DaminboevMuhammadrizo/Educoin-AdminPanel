@@ -6,25 +6,19 @@ import axios from 'axios';
 import { getAccessToken } from '@/utils/getToken';
 import toast from 'react-hot-toast';
 
+interface Props {
+    open: boolean;
+    onClose: () => void;
+    onSuccess?: () => void;
+}
+
 interface Translation {
     language: string;
     title: string;
     desc: string;
 }
 
-interface DefaultTask {
-    id: string;
-    translations: Translation[];
-}
-
-interface Props {
-    open: boolean;
-    onClose: () => void;
-    onSuccess?: () => void;
-    defaultTask: DefaultTask | null;
-}
-
-export default function UpdateDefaultTasksModal({ open, onClose, onSuccess, defaultTask }: Props) {
+export default function CreateDefaultTasksModal({ open, onClose, onSuccess }: Props) {
     const [translations, setTranslations] = useState<Translation[]>([
         { language: 'UZ', title: '', desc: '' },
         { language: 'EN', title: '', desc: '' },
@@ -35,24 +29,14 @@ export default function UpdateDefaultTasksModal({ open, onClose, onSuccess, defa
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
     useEffect(() => {
-        if (open && defaultTask) {
-            const uzTranslation = defaultTask.translations.find(t => t.language === 'UZ');
-            const enTranslation = defaultTask.translations.find(t => t.language === 'EN');
-            const ruTranslation = defaultTask.translations.find(t => t.language === 'RU');
-
-            setTranslations([
-                { language: 'UZ', title: uzTranslation?.title || '', desc: uzTranslation?.desc || '' },
-                { language: 'EN', title: enTranslation?.title || '', desc: enTranslation?.desc || '' },
-                { language: 'RU', title: ruTranslation?.title || '', desc: ruTranslation?.desc || '' }
-            ]);
-        } else if (!open) {
+        if (!open) {
             setTranslations([
                 { language: 'UZ', title: '', desc: '' },
                 { language: 'EN', title: '', desc: '' },
                 { language: 'RU', title: '', desc: '' }
             ]);
         }
-    }, [open, defaultTask]);
+    }, [open]);
 
     const handleTitleChange = (language: string, value: string) => {
         if (value.length <= 32) {
@@ -83,14 +67,9 @@ export default function UpdateDefaultTasksModal({ open, onClose, onSuccess, defa
             return;
         }
 
-        if (!defaultTask?.id) {
-            toast.error('ID topilmadi!');
-            return;
-        }
-
         setLoading(true);
         try {
-            const updateData = {
+            const defaultTaskData = {
                 translations: translations.map(t => ({
                     language: t.language,
                     title: t.title.trim(),
@@ -98,14 +77,14 @@ export default function UpdateDefaultTasksModal({ open, onClose, onSuccess, defa
                 })),
             };
 
-            await axios.patch(`${baseUrl}/default-tasks/${defaultTask.id}`, updateData, {
+            await axios.post(`${baseUrl}/default-tasks`, defaultTaskData, {
                 headers: {
                     Authorization: `Bearer ${getAccessToken()}`,
                     'Content-Type': 'application/json',
                 },
             });
 
-            toast.success('Default task yangilandi!');
+            toast.success('Default task yaratildi!');
             onSuccess?.();
             onClose();
         } catch (error: any) {
@@ -115,7 +94,7 @@ export default function UpdateDefaultTasksModal({ open, onClose, onSuccess, defa
         }
     };
 
-    if (!open || !defaultTask) return null;
+    if (!open) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/40" onClick={onClose}>
@@ -124,7 +103,7 @@ export default function UpdateDefaultTasksModal({ open, onClose, onSuccess, defa
                 onClick={e => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center px-4 py-4 border-b">
-                    <h2 className="text-lg font-semibold text-gray-900">Tahrirlash</h2>
+                    <h2 className="text-lg font-semibold text-gray-900">Yangi Vazifa</h2>
                     <button
                         onClick={onClose}
                         className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1 rounded"
@@ -134,116 +113,66 @@ export default function UpdateDefaultTasksModal({ open, onClose, onSuccess, defa
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-4">
-                    {/* 3 ta title birga */}
                     <div className="space-y-3">
                         <label className="block text-sm font-medium text-gray-700">Sarlavha</label>
 
-                        <div>
-                            <div className="flex justify-between items-center mt-1">
-                                <p className="text-xs text-gray-500">O'zbekcha (UZ)</p>
-                                <p className="text-xs text-gray-500">
-                                    {translations.find(t => t.language === 'UZ')?.title.length || 0}/32
-                                </p>
+                        {translations.map((translation) => (
+                            <div key={translation.language}>
+                                <div className="flex justify-between items-center mb-1">
+                                    <p className="text-xs text-gray-500">
+                                        {translation.language === 'UZ' ? "O'zbekcha (UZ)" :
+                                         translation.language === 'EN' ? "English (EN)" :
+                                         "Русский (RU)"}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                        {translation.title.length}/32
+                                    </p>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={translation.title}
+                                    onChange={(e) => handleTitleChange(translation.language, e.target.value)}
+                                    placeholder={
+                                        translation.language === 'UZ' ? "O'zbekcha sarlavha" :
+                                        translation.language === 'EN' ? "English title" :
+                                        "Русский заголовок"
+                                    }
+                                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900"
+                                    required
+                                />
                             </div>
-                            <input
-                                type="text"
-                                value={translations.find(t => t.language === 'UZ')?.title || ''}
-                                onChange={(e) => handleTitleChange('UZ', e.target.value)}
-                                placeholder="O'zbekcha sarlavha"
-                                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900"
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <div className="flex justify-between items-center mt-1">
-                                <p className="text-xs text-gray-500">English (EN)</p>
-                                <p className="text-xs text-gray-500">
-                                    {translations.find(t => t.language === 'EN')?.title.length || 0}/32
-                                </p>
-                            </div>
-                            <input
-                                type="text"
-                                value={translations.find(t => t.language === 'EN')?.title || ''}
-                                onChange={(e) => handleTitleChange('EN', e.target.value)}
-                                placeholder="English title"
-                                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900"
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <div className="flex justify-between items-center mt-1">
-                                <p className="text-xs text-gray-500">Русский (RU)</p>
-                                <p className="text-xs text-gray-500">
-                                    {translations.find(t => t.language === 'RU')?.title.length || 0}/32
-                                </p>
-                            </div>
-                            <input
-                                type="text"
-                                value={translations.find(t => t.language === 'RU')?.title || ''}
-                                onChange={(e) => handleTitleChange('RU', e.target.value)}
-                                placeholder="Русский заголовок"
-                                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900"
-                                required
-                            />
-                        </div>
+                        ))}
                     </div>
 
-                    {/* 3 ta description birga */}
                     <div className="space-y-3">
                         <label className="block text-sm font-medium text-gray-700">Tavsif</label>
 
-                        <div>
-                            <div className="flex justify-between items-center mt-1">
-                                <p className="text-xs text-gray-500">O'zbekcha (UZ)</p>
-                                <p className="text-xs text-gray-500">
-                                    {translations.find(t => t.language === 'UZ')?.desc.length || 0}/256
-                                </p>
+                        {translations.map((translation) => (
+                            <div key={translation.language}>
+                                <div className="flex justify-between items-center mb-1">
+                                    <p className="text-xs text-gray-500">
+                                        {translation.language === 'UZ' ? "O'zbekcha (UZ)" :
+                                         translation.language === 'EN' ? "English (EN)" :
+                                         "Русский (RU)"}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                        {translation.desc.length}/256
+                                    </p>
+                                </div>
+                                <textarea
+                                    value={translation.desc}
+                                    onChange={(e) => handleDescChange(translation.language, e.target.value)}
+                                    placeholder={
+                                        translation.language === 'UZ' ? "O'zbekcha tavsif" :
+                                        translation.language === 'EN' ? "English description" :
+                                        "Русское описание"
+                                    }
+                                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900 resize-none"
+                                    rows={2}
+                                    required
+                                />
                             </div>
-                            <textarea
-                                value={translations.find(t => t.language === 'UZ')?.desc || ''}
-                                onChange={(e) => handleDescChange('UZ', e.target.value)}
-                                placeholder="O'zbekcha tavsif"
-                                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900 resize-none"
-                                rows={2}
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <div className="flex justify-between items-center mt-1">
-                                <p className="text-xs text-gray-500">English (EN)</p>
-                                <p className="text-xs text-gray-500">
-                                    {translations.find(t => t.language === 'EN')?.desc.length || 0}/256
-                                </p>
-                            </div>
-                            <textarea
-                                value={translations.find(t => t.language === 'EN')?.desc || ''}
-                                onChange={(e) => handleDescChange('EN', e.target.value)}
-                                placeholder="English description"
-                                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900 resize-none"
-                                rows={2}
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <div className="flex justify-between items-center mt-1">
-                                <p className="text-xs text-gray-500">Русский (RU)</p>
-                                <p className="text-xs text-gray-500">
-                                    {translations.find(t => t.language === 'RU')?.desc.length || 0}/256
-                                </p>
-                            </div>
-                            <textarea
-                                value={translations.find(t => t.language === 'RU')?.desc || ''}
-                                onChange={(e) => handleDescChange('RU', e.target.value)}
-                                placeholder="Русское описание"
-                                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-900 resize-none"
-                                rows={2}
-                                required
-                            />
-                        </div>
+                        ))}
                     </div>
 
                     <div className="flex justify-end gap-2 pt-3">
@@ -261,7 +190,7 @@ export default function UpdateDefaultTasksModal({ open, onClose, onSuccess, defa
                             className="px-4 py-2 text-sm text-white font-medium rounded disabled:opacity-50"
                             style={{ background: 'linear-gradient(135deg, #69569F, #8B7AB8)' }}
                         >
-                            {loading ? 'Yuklanmoqda...' : 'Yangilash'}
+                            {loading ? 'Yuklanmoqda...' : 'Saqlash'}
                         </button>
                     </div>
                 </form>

@@ -1,4 +1,3 @@
-// modals/levels/UpdateLevelModal.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -37,7 +36,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
         { language: 'RU', title: '', subTitle: '', description: '' }
     ]);
 
-    // Level prop o'zgarganda formani to'ldirish
     useEffect(() => {
         if (level && open) {
             setFormData({
@@ -46,7 +44,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
                 color: level.color || 'FF0000'
             });
 
-            // Tarjimalarni to'ldirish
             const updatedTranslations = translations.map(trans => {
                 const levelTrans = level.translations.find((t: any) => t.language === trans.language);
                 return levelTrans ? {
@@ -60,7 +57,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
         }
     }, [level, open]);
 
-    // Modal yopilganda reset qilish
     useEffect(() => {
         if (!open) {
             setFormData({
@@ -76,7 +72,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
         }
     }, [open]);
 
-    // Hex formatni tekshirish
     const isValidHex = (color: string): boolean => {
         return /^[0-9A-Fa-f]{6}$/.test(color);
     };
@@ -89,7 +84,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
     };
 
     const handleColorChange = (value: string) => {
-        // Agar # bilan kiritilgan bo'lsa, # ni olib tashlaymiz
         const cleanColor = value.startsWith('#') ? value.slice(1) : value;
         setFormData(prev => ({
             ...prev,
@@ -116,7 +110,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
 
         if (!level) return;
 
-        // Validation
         for (const translation of translations) {
             if (!translation.title.trim() || !translation.subTitle.trim() || !translation.description.trim()) {
                 toast.error(`Barcha ${translation.language} maydonlarni to'ldiring`);
@@ -134,7 +127,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
             return;
         }
 
-        // Rang validatsiyasi
         if (!isValidHex(formData.color)) {
             toast.error('Rang notoʻgʻri formatda. Faqat 6 ta raqam/harf boʻlishi kerak (masalan: FF0000)');
             return;
@@ -159,14 +151,12 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
             onSuccess();
             onClose();
         } catch (err: any) {
-            console.error(err);
             toast.error(err.response?.data?.message || 'Xatolik yuz berdi');
         } finally {
             setLoading(false);
         }
     };
 
-    // Color input uchun # bilan qiymat
     const getColorInputValue = () => {
         return `#${formData.color}`;
     };
@@ -187,12 +177,10 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-6">
-                    {/* Asosiy ma'lumotlar */}
                     <div className="space-y-4">
                         <h3 className="text-md font-medium text-gray-800 border-l-4 border-green-500 pl-3">Asosiy ma'lumotlar</h3>
 
                         <div className="grid grid-cols-1 gap-4">
-                            {/* Tartib raqami */}
                             <div className="bg-gray-50 rounded-lg p-4">
                                 <label className="block text-sm font-medium mb-2 text-gray-700">Tartib raqami *</label>
                                 <input
@@ -205,7 +193,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
                                 />
                             </div>
 
-                            {/* Coinlar soni */}
                             <div className="bg-gray-50 rounded-lg p-4">
                                 <label className="block text-sm font-medium mb-2 text-gray-700">Coinlar soni *</label>
                                 <input
@@ -218,7 +205,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
                                 />
                             </div>
 
-                            {/* Rang tanlash */}
                             <div className="bg-white/70 backdrop-blur-sm border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300">
                                 <label className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-2">
                                     <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,7 +214,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
                                 </label>
 
                                 <div className="flex items-center gap-3">
-                                    {/* Rang tanlash inputi */}
                                     <div className="relative group">
                                         <input
                                             type="color"
@@ -239,7 +224,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
                                         <div className="absolute inset-0 rounded-lg from-white/30 to-transparent pointer-events-none"></div>
                                     </div>
 
-                                    {/* Rang kodi va namuna */}
                                     <div className="flex-1 space-y-2">
                                         <div className="flex items-center gap-2">
                                             <span className="text-gray-500 font-mono text-sm">#</span>
@@ -272,7 +256,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
                         </div>
                     </div>
 
-                    {/* Tarjimalar */}
                     <div className="space-y-4">
                         <h3 className="text-md font-medium text-gray-800 border-l-4 border-blue-500 pl-3">Tarjimalar</h3>
 
@@ -287,7 +270,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
                                 </h4>
 
                                 <div className="space-y-3">
-                                    {/* Nomi */}
                                     <div>
                                         <label className="block text-xs font-medium text-gray-600 mb-2">Nomi *</label>
                                         <input
@@ -300,7 +282,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
                                         />
                                     </div>
 
-                                    {/* Sub Title */}
                                     <div>
                                         <label className="block text-xs font-medium text-gray-600 mb-2">Sub Title *</label>
                                         <input
@@ -313,7 +294,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
                                         />
                                     </div>
 
-                                    {/* Tavsif */}
                                     <div>
                                         <label className="block text-xs font-medium text-gray-600 mb-2">Tavsif *</label>
                                         <textarea
@@ -330,7 +310,6 @@ export default function UpdateLevelModal({ open, onClose, onSuccess, level }: Up
                         ))}
                     </div>
 
-                    {/* Action buttons */}
                     <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 mt-4">
                         <button
                             type="button"

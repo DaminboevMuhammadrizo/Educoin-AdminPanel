@@ -113,7 +113,7 @@ export default function DefaultTasksPage() {
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {tasks.map(task => (
-              <div key={task.id} className="relative bg-white rounded-xl p-5 shadow-md overflow-hidden">
+              <div key={task.id} className="relative bg-white rounded-xl p-5 shadow-md">
                 <div className="absolute top-2 right-2 flex gap-1">
                   <button
                     onClick={() => setEditTask(task)}
@@ -131,24 +131,17 @@ export default function DefaultTasksPage() {
 
                 <div className="flex flex-col items-center text-center mt-2">
                   <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                    <svg
-                      width="32"
-                      height="32"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M9 11l3 3L22 4"></path>
                       <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
                     </svg>
                   </div>
 
-                  <h3 className="text-base font-semibold text-gray-800 mb-2 w-full break-words">
+                  <h3 className="text-base font-semibold text-gray-800 mb-2 w-full ">
                     {getUZTitle(task.translations)}
                   </h3>
 
-                  <p className="text-xs text-gray-600 mb-2 w-full break-words min-h-[3rem]">
+                  <p className="text-xs text-gray-600 mb-2 w-full">
                     {getUZDescription(task.translations)}
                   </p>
 
@@ -160,10 +153,10 @@ export default function DefaultTasksPage() {
             ))}
           </div>
 
-          {pagination && (
+          {pagination && pagination.pageCount > 1 && (
             <div className="mt-6 flex items-center justify-between text-sm text-gray-600">
               <span>
-                Sahifa {pagination.pageNumber} / {pagination.pageCount} | Jami: {pagination.count} ta
+                Sahifa {pagination.pageNumber} / {pagination.pageCount}
               </span>
               <div className="flex gap-2">
                 <button

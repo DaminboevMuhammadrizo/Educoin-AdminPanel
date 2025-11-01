@@ -31,22 +31,6 @@ interface Notification {
     status: 'SENT' | 'PENDING' | 'FAILED';
 }
 
-interface ApiResponse {
-    statusCode: number;
-    success: boolean;
-    data: {
-        data: Notification[];
-        meta: {
-            pagination: {
-                pageNumber: number;
-                pageSize: number;
-                count: number;
-                pageCount: number;
-            };
-        };
-    };
-}
-
 export default function NotificationsPage() {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     const imgUrl = process.env.NEXT_PUBLIC_IMG_URL;
@@ -61,17 +45,8 @@ export default function NotificationsPage() {
 
     const getImageUrl = (imagePath: string): string => {
         if (!imagePath) return '';
-
-        // Agar URL allaqachon to'liq bo'lsa
         if (imagePath.startsWith('http')) return imagePath;
-
-        // Agar faqat fayl nomi bo'lsa (masalan: "ca9349a5-27e9-48b6-a6c1-72b160b2a836.jpeg")
-        if (!imagePath.startsWith('/')) {
-            return `${imgUrl}/${imagePath}`;
-        }
-
-        // Agar "/" bilan boshlansa
-        return `${imgUrl}${imagePath}`;
+        return !imagePath.startsWith('/') ? `${imgUrl}/${imagePath}` : `${imgUrl}${imagePath}`;
     };
 
     const fetchNotifications = async () => {
@@ -82,7 +57,7 @@ export default function NotificationsPage() {
             if (selectedStatus) params.status = selectedStatus;
             if (selectedRole) params.role = selectedRole;
 
-            const response = await axios.get<ApiResponse>(`${baseUrl}/notifications/admin`, {
+            const response = await axios.get(`${baseUrl}/notifications/admin`, {
                 headers: {
                     Authorization: `Bearer ${getAccessToken()}`,
                     'Content-Type': 'application/json'
@@ -164,13 +139,8 @@ export default function NotificationsPage() {
         }).replaceAll('/', '.');
     };
 
-    const handleAddSuccess = () => {
-        fetchNotifications();
-    };
-
     return (
         <div className="p-6">
-            {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">Bildirishnomalar</h1>
@@ -188,7 +158,6 @@ export default function NotificationsPage() {
                 </button>
             </div>
 
-            {/* Filters */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -243,7 +212,6 @@ export default function NotificationsPage() {
                 </div>
             </div>
 
-            {/* Notifications List */}
             {loading ? (
                 <div className="flex justify-center items-center h-64">
                     <CircularProgress sx={{ color: '#7C6BB3' }} />
@@ -260,7 +228,6 @@ export default function NotificationsPage() {
                         const statusInfo = getStatusLabel(notification.status);
                         return (
                             <div key={notification.id} className="bg-white rounded-xl p-5 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
-                                {/* Header with image and actions */}
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
@@ -303,7 +270,6 @@ export default function NotificationsPage() {
                                     </div>
                                 </div>
 
-                                {/* Content */}
                                 <div className="space-y-3">
                                     <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">
                                         {getUZTitle(notification.translations)}
@@ -313,7 +279,6 @@ export default function NotificationsPage() {
                                         {getUZDescription(notification.translations)}
                                     </p>
 
-                                    {/* Meta information */}
                                     <div className="grid grid-cols-2 gap-2 text-xs">
                                         <div className="flex flex-col">
                                             <span className="text-gray-500">Turi:</span>
@@ -337,7 +302,6 @@ export default function NotificationsPage() {
                                         </div>
                                     </div>
 
-                                    {/* Languages */}
                                     <div className="pt-2 border-t border-gray-200">
                                         <div className="flex flex-wrap gap-1">
                                             {notification.translations.map((trans) => (
@@ -357,14 +321,12 @@ export default function NotificationsPage() {
                 </div>
             )}
 
-            {/* Create Modal */}
             <CreateNotificationModal
                 open={openCreateModal}
                 onClose={() => setOpenCreateModal(false)}
-                onSuccess={handleAddSuccess}
+                onSuccess={fetchNotifications}
             />
 
-            {/* Delete Confirmation Modal */}
             {deleteId && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                     <div className="bg-white rounded-lg p-6 max-w-sm mx-4">

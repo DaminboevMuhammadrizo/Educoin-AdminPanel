@@ -50,19 +50,16 @@ export default function UpdateGameCategoryModal({ open, onClose, onSuccess, cate
                 { language: 'RU', title: ruTranslation?.title || '' }
             ]);
 
-            // Rasmni tekshirish - agar mavjud bo'lsa preview qilish
             if (category.photo && category.photo.trim() !== '') {
                 const fullPhotoUrl = category.photo.startsWith('http')
                     ? category.photo
                     : `${imgUrl}/${category.photo}`;
 
-                // Rasm mavjudligini tekshirish
                 checkImageExists(fullPhotoUrl);
             } else {
                 setPhotoPreview('');
             }
         } else if (!open) {
-            // Formani tozalash
             setTranslations([
                 { language: 'UZ', title: '' },
                 { language: 'EN', title: '' },
@@ -73,14 +70,13 @@ export default function UpdateGameCategoryModal({ open, onClose, onSuccess, cate
         }
     }, [open, category, imgUrl]);
 
-    // Rasm mavjudligini tekshirish funksiyasi
     const checkImageExists = (url: string) => {
         const img = new Image();
         img.onload = () => {
             setPhotoPreview(url);
         };
         img.onerror = () => {
-            setPhotoPreview(''); // Rasm mavjud emas
+            setPhotoPreview('');
         };
         img.src = url;
     };
@@ -98,8 +94,7 @@ export default function UpdateGameCategoryModal({ open, onClose, onSuccess, cate
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            // Fayl hajmini tekshirish (1MB limit)
-            const maxSize = 1 * 1024 * 1024; // 1MB
+            const maxSize = 1 * 1024 * 1024;
             if (file.size > maxSize) {
                 toast.error(`Fayl hajmi 1MB dan katta! Sizning faylingiz: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
                 return;
@@ -131,7 +126,6 @@ export default function UpdateGameCategoryModal({ open, onClose, onSuccess, cate
 
         setLoading(true);
         try {
-            // Rasmni serverga yuklash
             const imageForm = new FormData();
             imageForm.append('file', photo);
 
@@ -148,7 +142,6 @@ export default function UpdateGameCategoryModal({ open, onClose, onSuccess, cate
                 throw new Error('Rasm yuklashda xatolik');
             }
 
-            // Kategoriyani yangilash
             const updateData = {
                 photo: photoUrl,
                 translations: translations.map(t => ({
@@ -174,7 +167,6 @@ export default function UpdateGameCategoryModal({ open, onClose, onSuccess, cate
         }
     };
 
-    // Rasm mavjudligini tekshirish
     const hasExistingPhoto = category?.photo && category.photo.trim() !== '';
 
     if (!open || !category) return null;
@@ -196,14 +188,12 @@ export default function UpdateGameCategoryModal({ open, onClose, onSuccess, cate
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-4">
-                    {/* Rasm yuklash */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Yangi rasm *
                         </label>
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer relative">
                             {!photoPreview ? (
-                                // Rasm yuklanmagan
                                 <>
                                     <input
                                         type="file"
@@ -225,7 +215,6 @@ export default function UpdateGameCategoryModal({ open, onClose, onSuccess, cate
                                     </div>
                                 </>
                             ) : (
-                                // Rasm yuklangan
                                 <div className="relative">
                                     <img src={photoPreview} alt="Preview" className="w-full h-40 object-contain" />
                                     <div className="text-xs text-gray-500 mt-1 text-center">
@@ -246,7 +235,6 @@ export default function UpdateGameCategoryModal({ open, onClose, onSuccess, cate
                         </div>
                     </div>
 
-                    {/* 3 ta title birga */}
                     <div className="space-y-3">
                         <label className="block text-sm font-medium text-gray-700">Kategoriya nomi *</label>
 

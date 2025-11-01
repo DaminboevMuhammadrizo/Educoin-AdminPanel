@@ -6,8 +6,6 @@ import { getAccessToken } from '@/utils/getToken';
 import CircularProgress from '@mui/material/CircularProgress';
 import toast from 'react-hot-toast';
 import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import DownloadIcon from '@mui/icons-material/Download';
 
 interface User {
     id: string;
@@ -21,22 +19,6 @@ interface Transaction {
     amount: number;
     user: User;
     createdAt: string;
-}
-
-interface ApiResponse {
-    statusCode: number;
-    success: boolean;
-    data: {
-        data: Transaction[];
-        meta: {
-            pagination: {
-                count: number;
-                pageCount: number;
-                pageNumber: number;
-                pageSize: number;
-            };
-        };
-    };
 }
 
 export default function PaymentsPage() {
@@ -65,7 +47,7 @@ export default function PaymentsPage() {
                 params.search = searchTerm;
             }
 
-            const response = await axios.get<ApiResponse>(`${baseUrl}/transactions`, {
+            const response = await axios.get(`${baseUrl}/transactions`, {
                 headers: {
                     Authorization: `Bearer ${getAccessToken()}`,
                     'Content-Type': 'application/json'
@@ -116,7 +98,6 @@ export default function PaymentsPage() {
 
     return (
         <div className="p-6">
-            {/* Search and Filters */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
                 <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
                     <div className="flex-1 relative">
@@ -141,7 +122,6 @@ export default function PaymentsPage() {
                 </form>
             </div>
 
-            {/* Transactions Table */}
             {loading ? (
                 <div className="flex justify-center items-center h-64">
                     <CircularProgress sx={{ color: '#7C6BB3' }} />
@@ -155,70 +135,67 @@ export default function PaymentsPage() {
             ) : (
                 <>
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Foydalanuvchi
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Telefon
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Miqdor
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Sana
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            ID
-                                        </th>
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Foydalanuvchi
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Telefon
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Miqdor
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Sana
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        ID
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {transactions.map((transaction) => (
+                                    <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <div className="h-10 w-10 from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                                                    <span className="text-white font-medium text-sm">
+                                                        {transaction.user.firstname[0]}{transaction.user.lastname[0]}
+                                                    </span>
+                                                </div>
+                                                <div className="ml-4">
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                        {transaction.user.firstname} {transaction.user.lastname}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-900">{transaction.user.phone}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm font-semibold text-green-600">
+                                                {formatAmount(transaction.amount)} so'm
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-500">
+                                                {formatDate(transaction.createdAt)}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-400 font-mono">
+                                                {transaction.id.substring(0, 8)}...
+                                            </div>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {transactions.map((transaction) => (
-                                        <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center">
-                                                    <div className=" h-10 w-10 from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
-                                                        <span className="text-white font-medium text-sm">
-                                                            {transaction.user.firstname[0]}{transaction.user.lastname[0]}
-                                                        </span>
-                                                    </div>
-                                                    <div className="ml-4">
-                                                        <div className="text-sm font-medium text-gray-900">
-                                                            {transaction.user.firstname} {transaction.user.lastname}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm text-gray-900">{transaction.user.phone}</div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-semibold text-green-600">
-                                                    {formatAmount(transaction.amount)} so'm
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm text-gray-500">
-                                                    {formatDate(transaction.createdAt)}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm text-gray-400 font-mono">
-                                                    {transaction.id.substring(0, 8)}...
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
 
-                    {/* Pagination */}
                     {pagination.pageCount > 1 && (
                         <div className="flex items-center justify-between mt-6 px-4">
                             <div className="flex justify-between items-center space-x-2">

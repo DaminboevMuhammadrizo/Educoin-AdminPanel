@@ -28,22 +28,6 @@ interface Level {
     createdAt: string;
 }
 
-interface ApiResponse {
-    statusCode: number;
-    success: boolean;
-    data: {
-        data: Level[];
-        meta: {
-            pagination: {
-                count: number;
-                pageCount: number;
-                pageNumber: number;
-                pageSize: number;
-            };
-        };
-    };
-}
-
 export default function LevelsPage() {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -57,7 +41,7 @@ export default function LevelsPage() {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const response = await axios.get<ApiResponse>(`${baseUrl}/levels/admin`, {
+            const response = await axios.get(`${baseUrl}/levels/admin`, {
                 headers: { Authorization: `Bearer ${getAccessToken()}` },
             });
 
@@ -68,7 +52,6 @@ export default function LevelsPage() {
                 toast.error('Maʼlumotlarni yuklashda xatolik');
             }
         } catch (err: any) {
-            console.log(err.response);
             toast.error(err.response?.data?.message || 'Xatolik yuz berdi');
         } finally {
             setLoading(false);
@@ -137,123 +120,118 @@ export default function LevelsPage() {
             ) : (
                 <>
                     <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-200">
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                            Tartib
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                            Nomi
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                            Tavsif
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                            Sub Title
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                            Coinlar
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                            Rang
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                            Sana
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                            Harakatlar
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                    {levels.map((level) => {
-                                        const uzTranslation = getUZTranslation(level.translations);
-                                        const fullColor = getFullColor(level.color);
+                        <table className="w-full">
+                            <thead>
+                                <tr className="bg-gray-50 border-b border-gray-200">
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        Tartib
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        Nomi
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        Tavsif
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        Sub Title
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        Coinlar
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        Rang
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        Sana
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        Harakatlar
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                                {levels.map((level) => {
+                                    const uzTranslation = getUZTranslation(level.translations);
+                                    const fullColor = getFullColor(level.color);
 
-                                        return (
-                                            <tr key={level.id} className="hover:bg-gray-50 transition-colors">
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                    return (
+                                        <tr key={level.id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div
+                                                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+                                                    style={{ backgroundColor: fullColor }}
+                                                >
+                                                    {level.order}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-sm font-medium text-gray-900">
+                                                    {uzTranslation.title}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-sm text-gray-600 max-w-xs truncate">
+                                                    {uzTranslation.description}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-sm text-gray-500">
+                                                    {uzTranslation.subTitle}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
+                                                    <span>{level.coins}</span>
+                                                    <span className="text-yellow-500">🪙</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center gap-2">
                                                     <div
-                                                        className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+                                                        className="w-4 h-4 rounded-full border border-gray-300"
                                                         style={{ backgroundColor: fullColor }}
+                                                    ></div>
+                                                    <span className="text-sm text-gray-600">
+                                                        {level.color}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {formatDate(level.createdAt)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => setEditLevel(level)}
+                                                        className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
                                                     >
-                                                        {level.order}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="text-sm font-medium text-gray-900">
-                                                        {uzTranslation.title}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="text-sm text-gray-600 max-w-xs truncate">
-                                                        {uzTranslation.description}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="text-sm text-gray-500">
-                                                        {uzTranslation.subTitle}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
-                                                        <span>{level.coins}</span>
-                                                        <span className="text-yellow-500">🪙</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center gap-2">
-                                                        <div
-                                                            className="w-4 h-4 rounded-full border border-gray-300"
-                                                            style={{ backgroundColor: fullColor }}
-                                                        ></div>
-                                                        <span className="text-sm text-gray-600">
-                                                            {level.color}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {formatDate(level.createdAt)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            onClick={() => setEditLevel(level)}
-                                                            className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
-                                                            title="Tahrirlash"
-                                                        >
-                                                            <EditIcon sx={{ fontSize: 18 }} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => setDeleteId(level.id)}
-                                                            className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                                                            title="O'chirish"
-                                                        >
-                                                            <DeleteIcon sx={{ fontSize: 18 }} />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                                                        <EditIcon sx={{ fontSize: 18 }} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setDeleteId(level.id)}
+                                                        className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                                                    >
+                                                        <DeleteIcon sx={{ fontSize: 18 }} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
                     </div>
 
                     {pagination && (
                         <div className="mt-6 flex items-center justify-between text-sm text-gray-600">
                             <span>
-                                Sahifa {pagination.pageNumber} / {pagination.pageCount} | Jami: {pagination.count} ta
+                                Sahifa {pagination.pageNumber} / {pagination.pageCount}
                             </span>
                         </div>
                     )}
                 </>
             )}
 
-            {/* Delete Confirmation Modal */}
             {deleteId && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                     <div className="bg-white rounded-lg p-6 max-w-sm mx-4">

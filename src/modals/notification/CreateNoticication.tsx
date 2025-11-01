@@ -48,20 +48,10 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Pr
     const [uploading, setUploading] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string>('');
 
-    // Rasm URL ni to'g'ri formatga o'tkazish
     const getImageUrl = (imagePath: string): string => {
         if (!imagePath) return '';
-
-        // Agar URL allaqachon to'liq bo'lsa
         if (imagePath.startsWith('http')) return imagePath;
-
-        // Agar faqat fayl nomi bo'lsa (masalan: "ca9349a5-27e9-48b6-a6c1-72b160b2a836.jpeg")
-        if (!imagePath.startsWith('/')) {
-            return `${imgUrl}/${imagePath}`;
-        }
-
-        // Agar "/" bilan boshlansa
-        return `${imgUrl}${imagePath}`;
+        return !imagePath.startsWith('/') ? `${imgUrl}/${imagePath}` : `${imgUrl}${imagePath}`;
     };
 
     useEffect(() => {
@@ -85,7 +75,6 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Pr
                 setUsers(response.data.data.data || []);
             }
         } catch (err) {
-            console.error('Users fetch error:', err);
             toast.error('Foydalanuvchilarni yuklashda xatolik');
         }
     };
@@ -106,7 +95,6 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Pr
         }
     }, [open]);
 
-    // Rasm yuklash funksiyasi
     const handleFileUpload = async (file: File) => {
         try {
             setUploading(true);
@@ -123,9 +111,6 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Pr
             if (response.data.success) {
                 const imageUrl = response.data.data.url;
                 const fullImageUrl = getImageUrl(imageUrl);
-
-                console.log('Original URL:', imageUrl);
-                console.log('Formatted URL:', fullImageUrl);
 
                 setImage(imageUrl);
                 setPreviewUrl(fullImageUrl);
@@ -145,7 +130,6 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Pr
         }
     };
 
-    // Butun div bosilganda file inputni ishga tushirish
     const handleDivClick = () => {
         if (!uploading) {
             document.getElementById('file-upload-input')?.click();
@@ -171,7 +155,6 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Pr
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validation
         const emptyTranslation = translations.find(t => !t.title.trim() || !t.description.trim());
         if (emptyTranslation) {
             toast.error('Barcha tillar uchun sarlavha va tavsifni kiriting!');
@@ -234,7 +217,6 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Pr
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
-                    {/* Broadcast toggle */}
                     <div>
                         <label className="flex items-center gap-3 cursor-pointer">
                             <input
@@ -255,7 +237,6 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Pr
                         </p>
                     </div>
 
-                    {/* Type selection */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Turi *
@@ -271,7 +252,6 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Pr
                         </select>
                     </div>
 
-                    {/* Role selection */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Rol *
@@ -287,7 +267,6 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Pr
                         </select>
                     </div>
 
-                    {/* Receivers selection (only when not broadcast) */}
                     {!isBroadcast && (
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -320,7 +299,6 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Pr
                         </div>
                     )}
 
-                    {/* Translations */}
                     <div className="space-y-4">
                         <label className="block text-sm font-medium text-gray-700">Tarjimalar *</label>
 
@@ -355,7 +333,6 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Pr
                         ))}
                     </div>
 
-                    {/* Photo Upload */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Rasm
@@ -372,12 +349,8 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Pr
                                         src={previewUrl}
                                         alt="Yuklangan rasm"
                                         className="mx-auto h-32 w-32 object-cover rounded-lg"
-                                        onError={(e) => {
-                                            console.error('Rasm yuklanmadi URL:', previewUrl);
-                                            toast.error(`Rasm yuklanmadi: ${previewUrl}`);
-                                        }}
-                                        onLoad={() => {
-                                            console.log('Rasm muvaffaqiyatli yuklandi:', previewUrl);
+                                        onError={() => {
+                                            toast.error('Rasm yuklanmadi');
                                         }}
                                     />
                                     <p className="text-sm text-green-600 mt-2">
@@ -415,7 +388,6 @@ export default function CreateNotificationModal({ open, onClose, onSuccess }: Pr
                         />
                     </div>
 
-                    {/* Buttons */}
                     <div className="flex justify-end gap-3 pt-4 border-t">
                         <button
                             type="button"
