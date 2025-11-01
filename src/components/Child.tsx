@@ -342,15 +342,6 @@ export default function ChildrenPage() {
                             </button>
                         )}
                     </div>
-
-                    <button
-                        onClick={handleAdd}
-                        className="flex items-center gap-2 px-4 py-2 text-white font-semibold rounded-lg shadow hover:shadow-md transition-all"
-                        style={{ background: 'linear-gradient(135deg, #69569F, #8B7AB8)' }}
-                    >
-                        <AddIcon sx={{ fontSize: 20 }} />
-                        <span className="text-sm">Qo'shish</span>
-                    </button>
                 </div>
             </div>
 
