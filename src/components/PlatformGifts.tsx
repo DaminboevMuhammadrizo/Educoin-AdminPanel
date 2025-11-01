@@ -217,7 +217,7 @@ export default function PlatformGiftsPage() {
 
                                 <div className="flex flex-col items-center text-center mt-2">
                                     <div
-                                        className="w-14 h-14 rounded-full flex items-center justify-center mb-3 flex-shrink-0 overflow-hidden transition-all"
+                                        className="w-14 h-14 rounded-full flex items-center justify-center mb-3 overflow-hidden transition-all"
                                         style={{
                                             background: hovered === gift.id
                                                 ? 'linear-gradient(135deg, #69569F, #8B7AB8)'
@@ -226,11 +226,10 @@ export default function PlatformGiftsPage() {
                                     >
                                         {gift.photo ? (
                                             <img
-                                                src={getImageUrl(gift.photo)} // getImageUrl ni qo'llash
+                                                src={getImageUrl(gift.photo)}
                                                 alt={getUZTitle(gift.translations)}
                                                 className="w-8 h-8 object-contain"
                                                 onError={(e) => {
-                                                    // Rasm yuklanmasa, default icon ko'rsatish
                                                     e.currentTarget.style.display = 'none';
                                                     const parent = e.currentTarget.parentElement;
                                                     if (parent) {
@@ -247,14 +246,14 @@ export default function PlatformGiftsPage() {
                                     </div>
 
                                     <h3
-                                        className="text-base font-semibold text-gray-800 mb-1 w-full break-words"
+                                        className="text-base font-semibold text-gray-800 mb-1 w-full"
                                         title={gift.translations.find(t => t.language === 'UZ')?.title}
                                     >
                                         {getUZTitle(gift.translations)}
                                     </h3>
 
                                     <p
-                                        className="text-xs text-gray-600 mb-2 w-full break-words"
+                                        className="text-xs text-gray-600 mb-2 w-full"
                                         title={gift.translations.find(t => t.language === 'UZ')?.miniDescription}
                                     >
                                         {getUZMiniDesc(gift.translations)}
